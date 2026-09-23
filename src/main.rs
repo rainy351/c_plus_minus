@@ -1,6 +1,8 @@
 mod lexer;
 use lexer::tokenize;
 
+mod ast;
+
 fn main() {
     let source_code = r#"
         // тест лексера C±
@@ -11,5 +13,7 @@ fn main() {
         F a;
     "#;
 
-    println!("{:?}", tokenize(source_code));
+    let tokens = tokenize(source_code);
+
+    println!("{:?}", tokens);
 }

@@ -1,6 +1,3 @@
-use std::iter::Peekable;
-use std::str::{Chars, FromStr};
-
 #[derive(Debug)]
 pub enum Token {
     // 1. Ключевые слова C±
