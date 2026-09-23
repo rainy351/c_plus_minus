@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Token {
     // 1. Ключевые слова C±
     Idk,            // idk | hz (динамический тип)
