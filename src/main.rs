@@ -27,6 +27,8 @@ fn main() {
         manual int manual_var = 5;
         manual string manual_string = "asda";
         manual int v2 = 2+4+5;
+        manual int v3 = 2+4*5;
+        manual int v4 = 2*4+5;
     "#;
 
     let tokens = tokenize(source_code);
