@@ -1,4 +1,5 @@
 use crate::{ast::{Expr, Stmt, VarType}, lexer::Token};
+use crate::ast::Ops;
 
 pub struct Parser {
     tokens: Vec<Token>,
@@ -120,7 +121,7 @@ impl Parser {
                     panic!("no assign????")
                 }
 
-                let var_value = self.expect_expr();
+                let var_value = self.parse_expr();
 
                 if self.peek() == Some(&Token::Semicolon) {
                     self.advance();
@@ -142,7 +143,7 @@ impl Parser {
                     panic!("no assign????")
                 }
 
-                let var_value = self.expect_expr();
+                let var_value = self.parse_expr();
 
                 if self.peek() == Some(&Token::Semicolon) {
                     self.advance();
@@ -154,6 +155,30 @@ impl Parser {
             },
             _ => panic!("idk what to do :(")
         }
+    }
+
+    pub fn parse_expr(&mut self) -> Expr {
+        let mut left = self.expect_expr();
+        
+        while let Some(_token) = self.peek(){
+            let op = match self.peek() {
+                Some(Token::Plus) => Ops::Plus,
+                Some(Token::Minus) => Ops::Minus,
+                Some(Token::Mult) => Ops::Mult,
+                Some(Token::Div) => Ops::Div,
+                
+                _ => {
+                    break;
+                }
+            };
+            self.advance();
+            
+            let right = self.expect_expr();
+
+            left = Expr::Operation { a: Box::new(left), op: op, b: Box::new(right) };
+        }
+
+        return left;
     }
 
     pub fn parse_tokens(&mut self) -> Vec<Stmt> {

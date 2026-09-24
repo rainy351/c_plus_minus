@@ -26,7 +26,7 @@ fn main() {
         F my_variable;
         manual int manual_var = 5;
         manual string manual_string = "asda";
-        // manual int v2 = 2+4;
+        manual int v2 = 2+4+5;
     "#;
 
     let tokens = tokenize(source_code);
