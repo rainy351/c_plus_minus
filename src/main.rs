@@ -1,10 +1,16 @@
 mod lexer;
+use std::println;
+
 use lexer::tokenize;
 
 mod ast;
 
 mod parser;
 use parser::Parser;
+
+use crate::vm::VM;
+
+mod vm;
 
 fn main() {
     // let source_code = r#"
@@ -29,6 +35,7 @@ fn main() {
         manual int v2 = 2+4+5;
         manual int v3 = 2+4*5;
         manual int v4 = 2*4+5;
+        manual int v5 = v2*v4+v3;
     "#;
 
     let tokens = tokenize(source_code);
@@ -37,7 +44,7 @@ fn main() {
 
     let mut parser = Parser::new(tokens);
     
-    println!("\nAST:");
+    // println!("\nAST:");
     // let stmt1 = parser.parse_stmt();
     // println!("{:?}", stmt1);
 
@@ -52,7 +59,13 @@ fn main() {
 
     let stmts = parser.parse_tokens();
 
-    for (i, stmt) in stmts.iter().enumerate() {
-        println!("{}: {:?}", i + 1, stmt);
-    }
+    // for (i, stmt) in stmts.iter().enumerate() {
+    //     println!("{}: {:?}", i + 1, stmt);
+    // }
+
+    println!("\nVM:");
+
+    let mut vm = VM::new();
+
+    vm.execute(stmts);
 }

@@ -39,7 +39,7 @@ pub enum Stmt {
         var_name:  String,
         new_value: Expr,
     },
-    FreeVar {
+    PressF {
         var_name:  String,
     },
     Expr(Expr),

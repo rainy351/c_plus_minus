@@ -102,7 +102,7 @@ impl Parser {
                 self.advance(); // сам токен команды
                 let var_name = self.expect_ident();
                 self.advance(); // точка с запятой
-                Stmt::FreeVar { var_name }
+                Stmt::PressF { var_name }
             },
             Some(Token::Include) => {
                 self.advance();
