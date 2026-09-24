@@ -40,6 +40,15 @@ impl VM {
         }
     }
 
+    fn check_type(&self, var_type:&VarType, value:&Value) -> bool {
+        match (var_type, value) {
+            (VarType::TypeInt, Value::Int(_)) => true,
+            (VarType::TypeString, Value::String(_)) => true,
+            (VarType::Idk, _) => true,
+            _ => false
+        }
+    }
+
     pub fn eval_expr(&self, expr: &Expr) -> Value {
         // тут будет обработка экспрешшнов
         match &expr {
@@ -85,8 +94,14 @@ impl VM {
             match stmt {
                 Stmt::Variable { var_name, var_type, var_value } => {
                     let val = self.eval_expr(&var_value);
-                    println!("Inserted var: name={}, type={:?}, val={:?}", var_name, var_type, val);
-                    self.memory.insert(var_name, (var_type, val));
+                    if self.check_type(&var_type, &val) {
+                        println!("Inserted var: name={}, type={:?}, val={:?}", var_name, var_type, val);
+                        self.memory.insert(var_name, (var_type, val));
+                    }
+                    else {
+                        panic!("tried to assign wrong types: VAR_NAME={:?}, TYPE={:?}, VALUE={:?}", var_name, var_type, val)
+                    }
+                    
                 },
                 Stmt::PressF { var_name } => {
                     println!("Removed var: name={}", var_name);
