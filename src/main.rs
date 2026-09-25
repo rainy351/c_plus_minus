@@ -36,6 +36,8 @@ fn main() {
         manual int v3 = 2+4*5;
         manual int v4 = 2*4+5;
         manual int v5 = v2*v4+v3;
+        ¯\_(ツ)_/¯;
+        ↑↑↓↓←→←→BA;
     "#;
 
     let tokens = tokenize(source_code);
@@ -57,11 +59,12 @@ fn main() {
     // let stmt4 = parser.parse_stmt();
     // println!("{:?}", stmt4);
 
+    println!("\nAST:");
     let stmts = parser.parse_tokens();
 
-    // for (i, stmt) in stmts.iter().enumerate() {
-    //     println!("{}: {:?}", i + 1, stmt);
-    // }
+    for (i, stmt) in stmts.iter().enumerate() {
+        println!("{}: {:?}", i + 1, stmt);
+    }
 
     println!("\nVM:");
 

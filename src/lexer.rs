@@ -161,6 +161,32 @@ pub fn tokenize(source_code: &str) -> Vec<Token> {
                 }
                 tokens.push(Token::Number(num_str.parse().expect("couldn't parse numbers string during lexing")));
             }
+
+            '¯' => {
+                let shrug = "¯\\_(ツ)_/¯";
+                let shrug_len = shrug.chars().count();
+                if chars.clone().take(shrug_len).eq(shrug.chars()) {
+                    // println!("shrug lmao");
+                    chars.nth(shrug_len - 1);
+                    tokens.push(Token::Shrug);
+                }
+                else {
+                    panic!("unknown char at: `¯`. maybe you meant: `{shrug}`?")
+                }
+            }
+
+            '↑' => {
+                let konami_code = "↑↑↓↓←→←→BA";
+                let konami_code_len = konami_code.chars().count();
+                if chars.clone().take(konami_code_len).eq(konami_code.chars()) {
+                    // println!("konami_code lmao");
+                    chars.nth(konami_code_len - 1);
+                    tokens.push(Token::KonamiCode);
+                }
+                else {
+                    panic!("unknown char at: `↑`. maybe you meant: `{konami_code}`?")
+                }
+            }
             
             _ => { tokens.push(Token::NotImplemented); chars.next(); }
         }
