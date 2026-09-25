@@ -50,7 +50,6 @@ impl VM {
     }
 
     pub fn eval_expr(&self, expr: &Expr) -> Value {
-        // тут будет обработка экспрешшнов
         match &expr {
             Expr::Number(num) => {
                 return Value::Int(*num);
@@ -89,7 +88,6 @@ impl VM {
     }
 
     pub fn execute(&mut self, stmts: Vec<Stmt>) {
-        // тут будет всякая императивщина + вызовы eval_expr
         for stmt in stmts {
             match stmt {
                 Stmt::Variable { var_name, var_type, var_value } => {

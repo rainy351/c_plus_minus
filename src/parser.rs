@@ -113,7 +113,6 @@ impl Parser {
             Some(Token::Idk) => {
                 self.advance();
                 let var_name = self.expect_ident();
-                // let var_value = Expr;
 
                 if self.peek() == Some(&Token::Assign) {
                         self.advance();
@@ -157,46 +156,21 @@ impl Parser {
         }
     }
 
-    // pub fn parse_expr(&mut self) -> Expr {
-    //     let mut left = self.expect_expr();
-    //     while let Some(_token) = self.peek(){
-    //         let op = match self.peek() {
-    //             Some(Token::Plus) => Ops::Plus,
-    //             Some(Token::Minus) => Ops::Minus,
-    //             Some(Token::Mult) => Ops::Mult,
-    //             Some(Token::Div) => Ops::Div,          
-    //             _ => {
-    //                 break;
-    //             }
-    //         };
-    //         self.advance();
-    //         let right = self.expect_expr();
-    //         left = Expr::Operation { a: Box::new(left), op: op, b: Box::new(right) };
-    //     }
-    //     return left;
-    // }
-
     pub fn parse_expr_deep(&mut self) -> Expr {
         let mut left = self.expect_expr();
         
         while let Some(_token) = self.peek(){
             let op = match self.peek() {
-                // Some(Token::Plus) => Ops::Plus,
-                // Some(Token::Minus) => Ops::Minus,
                 Some(Token::Mult) => Ops::Mult,
                 Some(Token::Div) => Ops::Div,
-                
                 _ => {
                     break;
                 }
             };
             self.advance();
-            
             let right = self.expect_expr();
-
             left = Expr::Operation { a: Box::new(left), op: op, b: Box::new(right) };
         }
-
         return left;
     }
 
@@ -207,20 +181,14 @@ impl Parser {
             let op = match self.peek() {
                 Some(Token::Plus) => Ops::Plus,
                 Some(Token::Minus) => Ops::Minus,
-                // Some(Token::Mult) => Ops::Mult,
-                // Some(Token::Div) => Ops::Div,
-                
                 _ => {
                     break;
                 }
             };
             self.advance();
-            
             let right = self.parse_expr_deep();
-
             left = Expr::Operation { a: Box::new(left), op: op, b: Box::new(right) };
         }
-
         return left;
     }
 

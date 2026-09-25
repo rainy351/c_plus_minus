@@ -51,8 +51,6 @@ pub enum Token {
 pub fn tokenize(source_code: &str) -> Vec<Token> {
     let mut chars = source_code.chars().peekable();
     let mut tokens = Vec::new();
-    // tokens.push(Token::Shrug);
-    // tokens
     while let Some(ch) = chars.peek() {
         match ch {
             ' ' | '\t' | '\r' | '\n' => { chars.next(); },
@@ -148,7 +146,6 @@ pub fn tokenize(source_code: &str) -> Vec<Token> {
             
             '0'..='9' => {
                 let mut num_str = String::new();
-                // num_str.push(*ch);
 
                 while let Some(&next_ch) = chars.peek() {
                     if next_ch.is_ascii_digit() {
@@ -166,7 +163,6 @@ pub fn tokenize(source_code: &str) -> Vec<Token> {
                 let shrug = "¯\\_(ツ)_/¯";
                 let shrug_len = shrug.chars().count();
                 if chars.clone().take(shrug_len).eq(shrug.chars()) {
-                    // println!("shrug lmao");
                     chars.nth(shrug_len - 1);
                     tokens.push(Token::Shrug);
                 }
@@ -179,7 +175,6 @@ pub fn tokenize(source_code: &str) -> Vec<Token> {
                 let konami_code = "↑↑↓↓←→←→BA";
                 let konami_code_len = konami_code.chars().count();
                 if chars.clone().take(konami_code_len).eq(konami_code.chars()) {
-                    // println!("konami_code lmao");
                     chars.nth(konami_code_len - 1);
                     tokens.push(Token::KonamiCode);
                 }
