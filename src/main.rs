@@ -1,16 +1,17 @@
 mod lexer;
-use std::println;
-
 use lexer::tokenize;
+
+use std::{fs, env};
 
 mod ast;
 
 mod parser;
 use parser::Parser;
 
-use crate::vm::VM;
-
 mod vm;
+use vm::VM;
+
+
 
 fn main() {
     // let source_code = r#"
@@ -26,21 +27,12 @@ fn main() {
 
     // println!("{:?}", tokens);
 
-    let source_code = r#"
-        include <std.xd>;
-        idk my_variable = 4;
-        F my_variable;
-        manual int manual_var = 5;
-        manual string manual_string = "asda";
-        manual int v2 = 2+4+5;
-        manual int v3 = 2+4*5;
-        manual int v4 = 2*4+5;
-        manual int v5 = v2*v4+v3;
-        ¯\_(ツ)_/¯;
-        ↑↑↓↓←→←→BA;
-    "#;
+    let args: Vec<String> = env::args().collect();
+    let mut filename = "main.cpm";
+    if args.len() > 1 { filename = args.get(1).unwrap(); }
+    let source_code = fs::read_to_string(filename).expect("error reading file");
 
-    let tokens = tokenize(source_code);
+    let tokens = tokenize(&source_code);
     println!("\nTOKENS:");
     println!("{:?}", tokens);
 

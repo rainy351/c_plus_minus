@@ -153,7 +153,7 @@ impl Parser {
                 
                 Stmt::Variable { var_name, var_type, var_value }
             },
-            _ => panic!("idk what to do ({:?}) :(", self.peek().unwrap())
+            _ => panic!("parser: idk what to do ({:?}) :(", self.peek().unwrap())
         }
     }
 

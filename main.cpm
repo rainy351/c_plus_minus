@@ -1,0 +1,12 @@
+include <std.xd>;
+idk my_variable = 4;
+F my_variable;
+manual int manual_var = 5;
+manual string manual_string = "asda";
+manual int v2 = 2+4+5;
+manual int v3 = 2+4*5;
+manual int v4 = 2*4+5;
+manual int v5 = v2*v4+v3;
+// ¯\_(ツ)_/¯;
+// ↑↑↓↓←→←→BA;
+// manual int a = "asd";
