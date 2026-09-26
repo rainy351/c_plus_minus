@@ -51,5 +51,8 @@ pub enum Stmt {
         params: Vec<String>,
         body: Vec<Stmt>,
     },
+    Return {
+        value: Expr,
+    },
     Expr(Expr),
 }

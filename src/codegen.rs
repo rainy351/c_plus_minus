@@ -51,7 +51,7 @@ pub fn stmt_to_c(stmt: &Stmt) -> String {
         Stmt::Assignment { var_name, new_value } => format!("{} = {};\n", var_name, expr_to_c(new_value)),
         Stmt::PressF { var_name } => format!("/* F {}; <- this is just a placholder for now */\n", var_name),
         Stmt::Expr(expr) => format!("{};\n", expr_to_c(expr)),
-        _ => panic!("codegen: stmt not implemented!!!")
+        _ => panic!("codegen: stmt not implemented!!! GOT:{:?}", stmt)
     }
 }
 

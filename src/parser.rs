@@ -28,8 +28,8 @@ impl Parser {
             Some(Token::Ident(name)) => {
                 name.clone()
             },
-            _ => {
-                panic!("no ident???");
+            other => {
+                panic!("no ident??? GOT:{:?}", other.unwrap());
             }
         }
     }
@@ -179,7 +179,56 @@ impl Parser {
                 else {
                     panic!("parser: expected a semicolon `;` after expression. GOT:{:?}", self.peek())
                 }
-            }
+            },
+            Some(Token::Func) => {
+                self.advance();
+                let name = self.expect_ident();
+                if self.peek() != Some(&Token::LParen) {
+                    panic!("parser: expected `(` in func declaration")
+                }
+                let mut args = Vec::new();
+                self.advance();
+                while self.peek().is_some() && self.peek() != Some(&Token::RParen){
+                    args.push(self.expect_ident());
+                    if self.peek() == Some(&Token::Comma) {
+                        self.advance();
+                    }
+                    else {
+                        break;
+                    }
+                }
+                if self.peek() != Some(&Token::RParen) {
+                    panic!("parser: expected `)` in func declaration, GOT:{:?}", self.peek().unwrap())
+                }
+                self.advance();
+                if self.peek() != Some(&Token::LBrace) {
+                    panic!("parser: expected `{}` in func declaration", '{')
+                }
+                self.advance();
+
+
+                let mut body = Vec::new();
+
+                while self.peek().is_some() && self.peek() != Some(&Token::RBrace) {
+                    body.push(self.parse_stmt());
+                }
+                if self.peek() != Some(&Token::RBrace) {
+                    panic!("parser: expected `{}` in func declaration", '}')
+                }
+                self.advance();
+
+
+                Stmt::FnDecl { fn_name: name, params: args, body: body }
+            },
+            Some(Token::Return) => {
+                self.advance();
+                let value = self.parse_expr();
+                if self.peek() != Some(&Token::Semicolon) {
+                    panic!("parser: expected semicolon after return")
+                }
+                self.advance();
+                Stmt::Return { value: value }
+            },
             _ => panic!("parser: idk what to do ({:?}) :(", self.peek().unwrap())
         }
     }

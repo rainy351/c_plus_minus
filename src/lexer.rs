@@ -77,6 +77,8 @@ pub fn tokenize(source_code: &str) -> Vec<Token> {
             '>' => { tokens.push(Token::Gt); chars.next(); }
             '(' => { tokens.push(Token::LParen); chars.next(); }
             ')' => { tokens.push(Token::RParen); chars.next(); }
+            '{' => { tokens.push(Token::LBrace); chars.next(); }
+            '}' => { tokens.push(Token::RBrace); chars.next(); }
             
             '"' => {
                 let mut string_str = String::new();

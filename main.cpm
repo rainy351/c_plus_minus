@@ -12,3 +12,8 @@ manual int v5 = v2*v4+v3;
 // manual int a = "asd";
 // idk a = test(1,2,);
 printf("%d", v3);
+func f1(){}
+func f2(a, b) {
+    return a+b;
+}
+
