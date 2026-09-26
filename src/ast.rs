@@ -23,6 +23,10 @@ pub enum Expr {
         op: Ops,
         b: Box<Expr>,
     },
+    Call {
+        name: String,
+        args: Vec<Expr>,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -41,6 +45,11 @@ pub enum Stmt {
     },
     PressF {
         var_name:  String,
+    },
+    FnDecl {
+        fn_name: String,
+        params: Vec<String>,
+        body: Vec<Stmt>,
     },
     Expr(Expr),
 }

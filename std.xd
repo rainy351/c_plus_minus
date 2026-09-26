@@ -1,0 +1,27 @@
+// Standard Library of C± (std.xd)
+manual string C_PLUS_MINUS_VERSION = "0.1";
+
+func print(msg) {
+    __builtin_sys_print(msg);
+}
+
+func println(msg) {
+    __builtin_sys_print(msg);
+    __builtin_sys_print("\n");
+}
+
+// func read_int() {
+//     return __builtin_sys_read_int();
+// }
+// 
+// func read_str() {
+//     return __builtin_sys_read_str();
+// }
+// 
+// func time() {
+//     return __builtin_sys_time();
+// }
+// 
+// func random() {
+//     return __builtin_sys_rand();
+// }

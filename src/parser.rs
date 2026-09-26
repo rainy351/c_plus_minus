@@ -1,3 +1,5 @@
+use core::panic;
+
 use crate::{ast::{Expr, Stmt, VarType}, lexer::Token};
 use crate::ast::Ops;
 
@@ -46,7 +48,7 @@ impl Parser {
         }
     }
 
-    pub fn expect_expr(&mut self) -> Expr {
+    pub fn parse_primary(&mut self) -> Expr {
         match self.advance() {
             Some(Token::Number(num)) => {
                 Expr::Number(*num)
@@ -55,10 +57,26 @@ impl Parser {
                 Expr::StringLit(string.clone())
             },
             Some(Token::Ident(ident)) => {
-                Expr::VarIdent(ident.clone())
+                let name = ident.clone();
+                // эта дрянь поддерживает 1 висячую запятую в конце
+                if self.peek() == Some(&Token::LParen) {
+                    self.advance();
+                    let mut args = Vec::new();
+                    while self.peek().is_some() && self.peek() != Some(&Token::RParen) {
+                        args.push(self.parse_expr());
+                        if self.peek() == Some(&Token::Comma){
+                            self.advance();
+                        } else if self.peek() != Some(&Token::RParen) {
+                            panic!("parser: expected `,` or `)`. FOUND={:?}", self.peek().unwrap())
+                        }
+                    }
+                    self.advance();
+                    Expr::Call { name: name, args: args }
+                }
+                else { Expr::VarIdent(name) }
             },
-            _ => {
-                panic!("no expression?????");
+            other => {
+                panic!("couldn't parse as expression????? GOT:{:?}", other.unwrap());
             }
         }
     }
@@ -125,7 +143,7 @@ impl Parser {
                 if self.peek() == Some(&Token::Semicolon) {
                     self.advance();
                 } else {
-                    panic!("no semicolon????");
+                    panic!("no semicolon???? GOT:{:?}", self.peek());
                 }
                 
                 Stmt::Variable { var_name, var_type: VarType::Idk, var_value }
@@ -152,12 +170,22 @@ impl Parser {
                 
                 Stmt::Variable { var_name, var_type, var_value }
             },
+            Some(Token::Ident(_)) | Some(Token::Number(_)) | Some(Token::StringLit(_)) => {
+                let expr = self.parse_expr();
+                if self.peek() == Some(&Token::Semicolon) {
+                    self.advance();
+                    Stmt::Expr(expr)
+                }
+                else {
+                    panic!("parser: expected a semicolon `;` after expression. GOT:{:?}", self.peek())
+                }
+            }
             _ => panic!("parser: idk what to do ({:?}) :(", self.peek().unwrap())
         }
     }
 
     pub fn parse_expr_deep(&mut self) -> Expr {
-        let mut left = self.expect_expr();
+        let mut left = self.parse_primary();
         
         while let Some(_token) = self.peek(){
             let op = match self.peek() {
@@ -168,7 +196,7 @@ impl Parser {
                 }
             };
             self.advance();
-            let right = self.expect_expr();
+            let right = self.parse_primary();
             left = Expr::Operation { a: Box::new(left), op: op, b: Box::new(right) };
         }
         return left;

@@ -10,3 +10,5 @@ manual int v5 = v2*v4+v3;
 // ¯\_(ツ)_/¯;
 // ↑↑↓↓←→←→BA;
 // manual int a = "asd";
+// idk a = test(1,2,);
+printf("%d", v3);
