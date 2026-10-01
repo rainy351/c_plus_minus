@@ -51,15 +51,36 @@ pub fn stmt_to_c(stmt: &Stmt) -> String {
         Stmt::Assignment { var_name, new_value } => format!("{} = {};\n", var_name, expr_to_c(new_value)),
         Stmt::PressF { var_name } => format!("/* F {}; <- this is just a placholder for now */\n", var_name),
         Stmt::Expr(expr) => format!("{};\n", expr_to_c(expr)),
+        Stmt::FnDecl { fn_name, params, body } => {
+            let mut body_as_str = String::new();
+            for stmt in body {
+                body_as_str.push_str(&stmt_to_c(stmt));
+            }
+            let params_c: Vec<String> = params.iter().map(|p| format!("long long {}", p)).collect();
+            format!("long long {}({})", fn_name, params_c.join(", ")) + "{\n" + &body_as_str + "return 0;\n}"
+        },
+        Stmt::Return { value } => format!("return {};\n", expr_to_c(value)),
         _ => panic!("codegen: stmt not implemented!!! GOT:{:?}", stmt)
     }
 }
 
 pub fn generate_c_code(stmts: &[Stmt]) -> String {
-    let mut c_code = String::from("#include <stdio.h>\n#include <stdbool.h>\n\nint main() {\n");
+    let mut c_code = String::from("// CODE GENERATED WITH C± TO C TRANSLATOR!!! NOT FOR MANUAL EDITING!\n#include <stdio.h>\n#include <stdbool.h>\n\n");
 
     for stmt in stmts {
-        c_code.push_str(&stmt_to_c(stmt));
+        if let Stmt::FnDecl { .. } = stmt {
+            c_code.push_str(&stmt_to_c(stmt));
+            c_code.push_str("\n\n");
+        }
+    }
+
+    c_code.push_str("\n\nint main() {\n");
+
+    for stmt in stmts {
+        if let Stmt::FnDecl { .. } = stmt {}
+        else {
+            c_code.push_str(&stmt_to_c(stmt));
+        }
     }
 
     c_code.push_str("    return 0;\n}\n");
