@@ -11,10 +11,11 @@ manual int v5 = v2*v4+v3;
 // ↑↑↓↓←→←→BA;
 // manual int a = "asd";
 // idk a = test(1,2,);
-printf("%d\n", v3);
+__builtin_sys_print(v3);
+__builtin_sys_print("\n");
 func f1(){}
 func f2(a, b) {
     return a+b;
 }
-printf("%d\n", f2(v3,v5));
+__builtin_sys_print(f2(v3,v5));
 

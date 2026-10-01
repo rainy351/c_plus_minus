@@ -1,5 +1,4 @@
 use core::panic;
-use std::{format, str::FromStr};
 
 use crate::ast::{Expr, Ops, Stmt, VarType};
 
@@ -28,17 +27,31 @@ pub fn expr_to_c(expr: &Expr) -> String {
         Expr::VarIdent(var_name) => var_name.to_string(),
         Expr::Operation { a, op, b } => format!("({} {} {})", expr_to_c(a), op_to_c(op), expr_to_c(b)),
         Expr::Call { name, args } => {
-            // let call_args: Vec<String> = args.iter().map(|l_expr| expr_to_c(l_expr)).collect();
-            // format!("{}({})", name, call_args.join(", "))
-            let mut cool_str = format!("{}(", name);
-            for (i, expr) in args.iter().enumerate() {
-                if i > 0 {
-                    cool_str += ", ";
+            match name.as_str() {
+                "__builtin_sys_print" => {
+                    if args.len() > 1 { panic!("codegen: sorry pal, `__builtin_sys_print` only supports 1 arg for now") }
+                    let arg = args.get(0).expect("codegen: at least 1 arg expected at: `__builtin_sys_print`");
+                    if let Expr::StringLit(string_lit) = arg {
+                        return format!("printf(\"%s\", {})", expr_to_c(arg))
+                    }
+                    else {
+                        return format!("printf(\"%lld\", {})", expr_to_c(arg))
+                    }
+                },
+                other => {
+                    // let call_args: Vec<String> = args.iter().map(|l_expr| expr_to_c(l_expr)).collect();
+                    // format!("{}({})", name, call_args.join(", "))
+                    let mut cool_str = format!("{}(", name);
+                    for (i, expr) in args.iter().enumerate() {
+                        if i > 0 {
+                            cool_str += ", ";
+                        }
+                        cool_str += &expr_to_c(expr);
+                    };
+                    cool_str += ")";
+                    cool_str
                 }
-                cool_str += &expr_to_c(expr);
-            };
-            cool_str += ")";
-            cool_str
+            }
         },
         _ => panic!("codegen: expr not implemented!!!")
     }
