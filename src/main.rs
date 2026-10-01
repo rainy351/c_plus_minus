@@ -2,12 +2,11 @@ use std::{env, fs, process::Command};
 mod lexer;
 use lexer::tokenize;
 mod ast;
+use ast::Stmt;
 mod parser;
 use parser::Parser;
 mod vm;
 use vm::VM;
-
-use crate::lexer::Token::Comma;
 
 mod codegen;
 
@@ -29,7 +28,19 @@ fn main() {
         println!("{}: {:?}", i + 1, stmt);
     }
 
-    let c_code = codegen::generate_c_code(&stmts);
+    let mut final_stmts = Vec::new();
+    for stmt in &stmts {
+        if let Stmt::Include { lib_name } = stmt {
+            let lib_source_code = fs::read_to_string(lib_name).expect(&format!("main: error reading file: {}", lib_name));
+            let lib_tokens = tokenize(&lib_source_code);
+            let mut lib_parser = Parser::new(lib_tokens);
+            let lib_stmts = lib_parser.parse_tokens();
+            final_stmts.extend(lib_stmts);
+        }
+    }
+    final_stmts.extend(stmts);
+
+    let c_code = codegen::generate_c_code(&final_stmts);
 
     println!("\nC:");
     println!("```\n");
@@ -46,5 +57,5 @@ fn main() {
     println!("\nVM:");
 
     let mut vm = VM::new();
-    vm.execute(stmts);
+    vm.execute(final_stmts);
 }

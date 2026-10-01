@@ -59,7 +59,7 @@ pub fn expr_to_c(expr: &Expr) -> String {
 
 pub fn stmt_to_c(stmt: &Stmt) -> String {
     match stmt {
-        Stmt::Include { lib_name } => format!("/*include <{lib_name}>*/\n"),
+        Stmt::Include { lib_name } => "".to_string(), //format!("/*include <{lib_name}>*/\n"),
         Stmt::Variable { var_name, var_type, var_value } => format!("{} {} = {};\n", var_type_to_c(var_type), var_name, expr_to_c(var_value)),
         Stmt::Assignment { var_name, new_value } => format!("{} = {};\n", var_name, expr_to_c(new_value)),
         Stmt::PressF { var_name } => format!("/* F {}; <- this is just a placholder for now */\n", var_name),
