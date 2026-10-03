@@ -8,6 +8,8 @@ fn op_to_c(op: &Ops) -> String {
         Ops::Minus => "-".to_string(),
         Ops::Mult => "*".to_string(),
         Ops::Div => "/".to_string(),
+        Ops::Lt => "<".to_string(),
+        Ops::Gt => ">".to_string(),
         _ => panic!("codegen: cant translate op to c: {:?}", op),
     }
 }
@@ -73,6 +75,22 @@ pub fn stmt_to_c(stmt: &Stmt) -> String {
             format!("long long {}({})", fn_name, params_c.join(", ")) + "{\n" + &body_as_str + "return 0;\n}"
         },
         Stmt::Return { value } => format!("return {};\n", expr_to_c(value)),
+        Stmt::IfElse { condition, true_branch, false_branch } => {
+            let mut ifelse_final = format!("if ({}) {}\n", expr_to_c(condition), '{');
+            for stmt in true_branch {
+                ifelse_final.push_str(&stmt_to_c(stmt));
+            }
+            ifelse_final.push_str("}\n");
+            if let Some(else_stmts) = false_branch {
+                ifelse_final.push_str("else {\n");
+                for stmt in else_stmts {
+                    ifelse_final.push_str(&stmt_to_c(&stmt));
+                }
+                ifelse_final.push_str("}\n");
+            }
+
+            ifelse_final
+        },
         _ => panic!("codegen: stmt not implemented!!! GOT:{:?}", stmt)
     }
 }

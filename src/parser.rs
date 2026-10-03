@@ -229,6 +229,57 @@ impl Parser {
                 self.advance();
                 Stmt::Return { value: value }
             },
+            Some(Token::If) => {
+                self.advance();
+                if self.peek() != Some(&Token::LParen) {
+                    panic!("parser: expected `(` after `if`");
+                }
+                self.advance();
+                let cond = self.parse_expr();
+                if self.peek() != Some(&Token::RParen) {
+                    panic!("parser: expected `)` closing condition in `if`");
+                }
+                self.advance();
+
+                
+                if self.peek() != Some(&Token::LBrace) {
+                    panic!("parser: expected `{}` after condition in `if`", '{');
+                }
+                self.advance();
+
+                let mut true_stmts = Vec::new();
+                while self.peek().is_some() && self.peek() != Some(&Token::RBrace) {
+                    true_stmts.push(self.parse_stmt());
+                }
+                if self.peek() != Some(&Token::RBrace) {
+                    panic!("parser: expected closing `{}` after stmts in `if`", '}')
+                }
+                self.advance();
+
+                let mut false_stmts_final = Option::None;
+
+                if self.peek() == Some(&Token::Else) {
+                    self.advance();
+                    if self.peek() != Some(&Token::LBrace) {
+                        panic!("parser: expected `{}` after `else`", '{');
+                    }
+                    self.advance();
+                    let mut false_stmts = Vec::new();
+                    while self.peek().is_some() && self.peek() != Some(&Token::RBrace) {
+                        false_stmts.push(self.parse_stmt());
+                    }
+                    if self.peek() != Some(&Token::RBrace) {
+                        panic!("parser: expected closing `{}` after stmts in `else`", '}')
+                    }
+                    self.advance();
+                    false_stmts_final = Option::Some(false_stmts)
+                }
+
+                Stmt::IfElse { condition: cond, true_branch: true_stmts, false_branch: false_stmts_final }
+            },
+            Some(Token::Else) => {
+                panic!("parser: unexpected `else` block. did you forget `if`?")
+            },
             _ => panic!("parser: idk what to do ({:?}) :(", self.peek().unwrap())
         }
     }
@@ -258,6 +309,8 @@ impl Parser {
             let op = match self.peek() {
                 Some(Token::Plus) => Ops::Plus,
                 Some(Token::Minus) => Ops::Minus,
+                Some(Token::Gt) => Ops::Gt,
+                Some(Token::Lt) => Ops::Lt,
                 _ => {
                     break;
                 }

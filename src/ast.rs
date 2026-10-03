@@ -3,7 +3,9 @@ pub enum Ops {
     Plus,
     Minus,
     Mult,
-    Div
+    Div,
+    Gt,
+    Lt
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -53,6 +55,11 @@ pub enum Stmt {
     },
     Return {
         value: Expr,
+    },
+    IfElse {
+        condition: Expr,
+        true_branch: Vec<Stmt>,
+        false_branch: Option<Vec<Stmt>>,
     },
     Expr(Expr),
 }

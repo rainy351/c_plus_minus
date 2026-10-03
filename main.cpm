@@ -16,5 +16,21 @@ func f1(){}
 func f2(a, b) {
     return a+b;
 }
-print(f2(v3,v5));
-
+println(f2(v3,v5));
+idk val1 = f2(v3, v5);
+idk val2 = 150;
+if(val1 > val2) {
+    print("first num is:");
+    println(val1);
+    print("it is greater than ");
+    println(val2);
+    print("diff: ");
+    println(val1-val2);
+} else {
+    print("first num is:");
+    println(val1);
+    print("it is less than ");
+    println(val2);
+    print("diff: ");
+    println(val2-val1);
+}

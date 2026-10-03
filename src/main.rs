@@ -54,8 +54,8 @@ fn main() {
         _ => panic!("failed to build out.c")
     }
 
-    println!("\nVM:");
+    // println!("\nVM:");
 
-    let mut vm = VM::new();
-    vm.execute(final_stmts);
+    // let mut vm = VM::new();
+    // vm.execute(final_stmts);
 }
