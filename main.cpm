@@ -1,36 +1,10 @@
 include <std.xd>;
-idk my_variable = 4;
-F my_variable;
-manual int manual_var = 5;
-manual string manual_string = "asda";
-manual int v2 = 2+4+5;
-manual int v3 = 2+4*5;
-manual int v4 = 2*4+5;
-manual int v5 = v2*v4+v3;
-// ¯\_(ツ)_/¯;
-// ↑↑↓↓←→←→BA;
-// manual int a = "asd";
-// idk a = test(1,2,);
-println(v3);
-func f1(){}
-func f2(a, b) {
+idk a = "asda";
+println(a);
+idk b = 4;
+println(b);
+func test(manual int a, manual int b): int {
     return a+b;
 }
-println(f2(v3,v5));
-idk val1 = f2(v3, v5);
-idk val2 = 150;
-if(val1 > val2) {
-    print("first num is:");
-    println(val1);
-    print("it is greater than ");
-    println(val2);
-    print("diff: ");
-    println(val1-val2);
-} else {
-    print("first num is:");
-    println(val1);
-    print("it is less than ");
-    println(val2);
-    print("diff: ");
-    println(val2-val1);
-}
+idk c = test(1, 3);
+println(c);

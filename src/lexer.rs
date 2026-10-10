@@ -34,6 +34,7 @@ pub enum Token {
     Div,          // /
 
     Semicolon,    // ;
+    Colon,        // :
     Dot,          // .
     Comma,        // ,
     LParen,       // (
@@ -71,6 +72,7 @@ pub fn tokenize(source_code: &str) -> Vec<Token> {
             }
             '=' => { tokens.push(Token::Assign); chars.next(); }
             ';' => { tokens.push(Token::Semicolon); chars.next(); }
+            ':' => { tokens.push(Token::Colon); chars.next(); }
             '.' => { tokens.push(Token::Dot); chars.next(); }
             ',' => { tokens.push(Token::Comma); chars.next(); }
             '<' => { tokens.push(Token::Lt); chars.next(); }
@@ -136,6 +138,7 @@ pub fn tokenize(source_code: &str) -> Vec<Token> {
                     "idk" | "hz" => tokens.push(Token::Idk),
                     "manual" => tokens.push(Token::Manual),
                     "int" => tokens.push(Token::TypeInt),
+                    "str" => tokens.push(Token::TypeString),
                     "string" => tokens.push(Token::TypeString),
                     "F" => tokens.push(Token::PressF),
                     "if" => tokens.push(Token::If),

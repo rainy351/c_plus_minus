@@ -8,6 +8,8 @@ use parser::Parser;
 mod vm;
 use vm::VM;
 
+mod typechecker;
+
 mod codegen;
 
 fn main() {
@@ -40,7 +42,10 @@ fn main() {
     }
     final_stmts.extend(stmts);
 
-    let c_code = codegen::generate_c_code(&final_stmts);
+    let mut checker = typechecker::TypeChecker::new(final_stmts);
+    let typed_ast = checker.typecheck();
+
+    let c_code = codegen::generate_c_code(typed_ast);
 
     println!("\nC:");
     println!("```\n");

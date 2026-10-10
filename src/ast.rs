@@ -8,7 +8,7 @@ pub enum Ops {
     Lt
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum VarType {
     Idk,
     TypeString,
@@ -50,8 +50,9 @@ pub enum Stmt {
     },
     FnDecl {
         fn_name: String,
-        params: Vec<String>,
+        params: Vec<(VarType, String)>,
         body: Vec<Stmt>,
+        returns: VarType,
     },
     Return {
         value: Expr,

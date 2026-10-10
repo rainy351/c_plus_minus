@@ -1,11 +1,20 @@
 // Standard Library of C± (std.xd)
 manual string C_PLUS_MINUS_VERSION = "0.1";
 
-func print(msg) {
+func print(manual int msg): int {
     __builtin_sys_print(msg);
 }
 
-func println(msg) {
+func println(manual int msg): int {
+    __builtin_sys_print(msg);
+    __builtin_sys_print("\n");
+}
+
+func print(manual string msg): int {
+    __builtin_sys_print(msg);
+}
+
+func println(manual string msg): int {
     __builtin_sys_print(msg);
     __builtin_sys_print("\n");
 }

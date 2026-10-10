@@ -42,8 +42,8 @@ impl Parser {
             Some(Token::TypeString) => {
                 VarType::TypeString
             },
-            _ => {
-                panic!("no ident???");
+            other => {
+                panic!("no type??? GOT:{:?}", other.unwrap());
             }
         }
     }
@@ -114,6 +114,16 @@ impl Parser {
         }
     }
 
+    pub fn parse_param(&mut self) -> (VarType, String) {
+        if self.peek() != Some(&Token::Manual) {
+            panic!("parser: expected `manual` as function param. GOT:{:?}", self.peek().unwrap())
+        }
+        self.advance();
+        let var_type = self.expect_type();
+        let var_name = self.expect_ident();
+        (var_type, var_name)
+    }
+
     pub fn parse_stmt(&mut self) -> Stmt {
         match self.peek() {
             Some(Token::PressF) => {
@@ -155,7 +165,7 @@ impl Parser {
                 let var_name = self.expect_ident();
 
                 if self.peek() == Some(&Token::Assign) {
-                        self.advance();
+                    self.advance();
                 } else {
                     panic!("no assign????")
                 }
@@ -189,7 +199,7 @@ impl Parser {
                 let mut args = Vec::new();
                 self.advance();
                 while self.peek().is_some() && self.peek() != Some(&Token::RParen){
-                    args.push(self.expect_ident());
+                    args.push(self.parse_param());
                     if self.peek() == Some(&Token::Comma) {
                         self.advance();
                     }
@@ -201,30 +211,37 @@ impl Parser {
                     panic!("parser: expected `)` in func declaration, GOT:{:?}", self.peek().unwrap())
                 }
                 self.advance();
-                if self.peek() != Some(&Token::LBrace) {
-                    panic!("parser: expected `{}` in func declaration", '{')
+
+                if self.peek() != Some(&Token::Colon) {
+                    panic!("parser: expected type in func declaration. GOT:{:?}", self.peek())
                 }
                 self.advance();
 
+                let returns = self.expect_type();
+
+                if self.peek() != Some(&Token::LBrace) {
+                    panic!("parser: expected `{}` in func declaration. GOT:{:?}", '{', self.peek())
+                }
+                self.advance();
 
                 let mut body = Vec::new();
 
                 while self.peek().is_some() && self.peek() != Some(&Token::RBrace) {
                     body.push(self.parse_stmt());
                 }
+
                 if self.peek() != Some(&Token::RBrace) {
-                    panic!("parser: expected `{}` in func declaration", '}')
+                    panic!("parser: expected `{}` in func declaration. GOT:{:?}", '}', self.peek())
                 }
                 self.advance();
 
-
-                Stmt::FnDecl { fn_name: name, params: args, body: body }
+                Stmt::FnDecl { fn_name: name, params: args, body: body, returns: returns }
             },
             Some(Token::Return) => {
                 self.advance();
                 let value = self.parse_expr();
                 if self.peek() != Some(&Token::Semicolon) {
-                    panic!("parser: expected semicolon after return")
+                    panic!("parser: expected semicolon after return. GOT:{:?}", self.peek())
                 }
                 self.advance();
                 Stmt::Return { value: value }
