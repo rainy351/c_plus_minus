@@ -31,19 +31,30 @@ fn main() {
     }
 
     let mut final_stmts = Vec::new();
-    for stmt in &stmts {
-        if let Stmt::Include { lib_name } = stmt {
-            let lib_source_code = fs::read_to_string(lib_name).expect(&format!("main: error reading file: {}", lib_name));
-            let lib_tokens = tokenize(&lib_source_code);
-            let mut lib_parser = Parser::new(lib_tokens);
-            let lib_stmts = lib_parser.parse_tokens();
-            final_stmts.extend(lib_stmts);
+    let mut main_stmts = Vec::new();
+    for stmt in stmts {
+        match stmt {
+            Stmt::Include { lib_name } => {
+                let lib_source_code = fs::read_to_string(lib_name.clone()).expect(&format!("main: error reading file: {}", lib_name));
+                let lib_tokens = tokenize(&lib_source_code);
+                let mut lib_parser = Parser::new(lib_tokens);
+                let lib_stmts = lib_parser.parse_tokens();
+                final_stmts.extend(lib_stmts);
+            },
+            _ => main_stmts.push(stmt),
         }
     }
-    final_stmts.extend(stmts);
+    
+    final_stmts.extend(main_stmts);
 
     let mut checker = typechecker::TypeChecker::new(final_stmts);
     let typed_ast = checker.typecheck();
+
+    
+    println!("\nMother-stupid-fucking-stupidized-typized-edestest AST:");
+    for (i, stmt) in typed_ast.iter().enumerate() {
+        println!("{}: {:?}", i + 1, stmt);
+    }
 
     let c_code = codegen::generate_c_code(typed_ast);
 
