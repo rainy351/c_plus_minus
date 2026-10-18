@@ -5,11 +5,7 @@ mod ast;
 use ast::Stmt;
 mod parser;
 use parser::Parser;
-mod vm;
-use vm::VM;
-
 mod typechecker;
-
 mod codegen;
 
 fn main() {
@@ -69,9 +65,4 @@ fn main() {
         Ok(s) if s.success() => println!("built out.exe"),
         _ => panic!("failed to build out.c")
     }
-
-    // println!("\nVM:");
-
-    // let mut vm = VM::new();
-    // vm.execute(final_stmts);
 }

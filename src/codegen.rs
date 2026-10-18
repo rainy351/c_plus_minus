@@ -1,6 +1,4 @@
-use std::collections::HashMap;
-
-use crate::ast::{Expr, Ops, Stmt, VarType};
+use crate::ast::{Ops, VarType};
 use crate::typechecker::{TypedExpr, TypedStmt};
 
 fn op_to_c(op: &Ops) -> String {
@@ -19,10 +17,17 @@ fn var_type_to_c(var_type: &VarType) -> String{
     match var_type {
         VarType::TypeInt => "long long".to_string(),
         VarType::TypeString => "const char*".to_string(),
-        VarType::Idk => "long long".to_string() // "auto".to_string(),
+        VarType::Idk => unreachable!() // "long long".to_string() // "auto".to_string(),
     }
 }
 
+fn parse_fparams(params: &Vec<(VarType, String)>) -> String {
+    let mut params_c = Vec::new();
+    for (var_type, var_name) in params {
+        params_c.push(format!("{} {}", var_type_to_c(&var_type), var_name));
+    }
+    params_c.join(", ")
+}
     
 pub fn mangle_func_name(name: &String, args: &Vec<(VarType, String)>) -> String {
     let mut suffix = String::new();
@@ -36,94 +41,58 @@ pub fn mangle_func_name(name: &String, args: &Vec<(VarType, String)>) -> String 
     return format!("{}__{}", name, suffix)
 }
 
-pub fn expr_to_c(expr: &TypedExpr, scope: &Vec<HashMap<String, VarType>>) -> String {
+pub fn expr_to_c(expr: &TypedExpr) -> String {
     match expr {
         TypedExpr::Number(num) => num.to_string(),
         TypedExpr::StringLit(stringlit) => format!("\"{}\"", stringlit),
         TypedExpr::VarIdent { name: var_name, var_type } => var_name.to_string(),
-        TypedExpr::Operation { a, op, b, return_type } => format!("({} {} {})", expr_to_c(a, scope), op_to_c(op), expr_to_c(b, scope)),
+        TypedExpr::Operation { a, op, b, return_type } => format!("({} {} {})", expr_to_c(a), op_to_c(op), expr_to_c(b)),
         TypedExpr::Call { name, args, return_type } => {
+            let mut args_typed = Vec::new();
+            for expr in args {
+                match expr {                            
+                    TypedExpr::StringLit(string_lit) => {
+                        args_typed.push((VarType::TypeString, "".to_string()));
+                    },
+                    TypedExpr::Number(num) => {
+                        args_typed.push((VarType::TypeInt, "".to_string()));
+                    },
+                    TypedExpr::VarIdent { name: var_name, var_type } => {
+                        args_typed.push((var_type.clone(), "".to_string()));
+                    },
+                    TypedExpr::Call { name, args, return_type } => {
+                        args_typed.push((return_type.clone(), "".to_string()));
+                    },
+                    TypedExpr::Operation { a, op, b, return_type } => {
+                        args_typed.push((return_type.clone(), "".to_string()));
+                    }
+                    other => {
+                        panic!("codegen: expr not implemented! GOT:{:?}", other)
+                    }
+                }
+            }
             match name.as_str() {
                 "__builtin_sys_print" => {
                     if args.len() > 1 { panic!("codegen: sorry pal, `__builtin_sys_print` only supports 1 arg for now") }
-                    let arg = args.get(0).expect("codegen: at least 1 arg expected at: `__builtin_sys_print`");
-                    match arg {
-                        TypedExpr::StringLit(_) => {
-                            return format!("printf(\"%s\", {})", expr_to_c(arg, scope))
+                    let arg = args.get(0).expect("codegen: at least 1 arg expected at: __builtin_sys_print");
+                    let (var_type, var_name) = args_typed.get(0).expect("codegen: at least 1 arg expected at: `__builtin_sys_print`");
+                    match var_type {
+                        VarType::TypeInt => {
+                            return format!("printf(\"%lld\", {})", expr_to_c(arg))
                         },
-                        TypedExpr::Number(_) => {
-                            return format!("printf(\"%lld\", {})", expr_to_c(arg, scope))
+                        VarType::TypeString => {
+                            return format!("printf(\"%s\", {})", expr_to_c(arg))
                         },
-                        TypedExpr::VarIdent { name: var_name, var_type } => {
-                            for next_scope in scope.iter().rev() {
-                                if next_scope.get(var_name).is_some() {
-                                    match next_scope.get(var_name).unwrap() {
-                                        VarType::TypeInt => return format!("printf(\"%lld\", {})", expr_to_c(arg, scope)),
-                                        VarType::TypeString => return format!("printf(\"%s\", {})", expr_to_c(arg, scope)),
-                                        _ => panic!("codegen: cartype not implemented in func call")
-                                    }
-                                }
-                            };
-                            return panic!("codegen: var {} not found in this scope.", var_name);
-                        },
-                        TypedExpr::Call { name, args, return_type } => {
-                            return format!("printf(\"%lld\", {})", expr_to_c(arg, scope))
-                        },
-                        other => {
-                            return panic!("codegen: expr not implemented! GOT:{:?}", other)
-                        }
+                        VarType::Idk => unreachable!()
                     }
-                },
-                other => {
-                    // let call_args: Vec<String> = args.iter().map(|l_expr| expr_to_c(l_expr)).collect();
-                    // format!("{}({})", name, call_args.join(", "))
-                    
-                    let mut args_typed = Vec::new();
-                    for expr in args {
-                        match expr {                            
-                            TypedExpr::StringLit(string_lit) => {
-                                args_typed.push((VarType::TypeString, "".to_string()));
-                            },
-                            TypedExpr::Number(num) => {
-                                args_typed.push((VarType::TypeInt, "".to_string()));
-                            },
-                            TypedExpr::VarIdent { name: var_name, var_type } => {
-                                let mut found = false;
-                                for next_scope in scope.iter().rev() {
-                                    if next_scope.get(var_name).is_some() {
-                                        match next_scope.get(var_name).unwrap() {
-                                            VarType::TypeInt => {args_typed.push((VarType::TypeInt, "".to_string())); found=true; break;},
-                                            VarType::TypeString => {args_typed.push((VarType::TypeString, "".to_string())); found=true; break;},
-                                            _ => panic!("codegen: cartype not implemented in expr_to_c")
-                                        }
-                                    }
-                                }
-                                if !found {
-                                    panic!("codegen: var {} not found in this scope.", var_name)
-                                }
-                            },
-                            TypedExpr::Call { name, args, return_type } => {
-                                // return format!("printf(\"%lld\", {})", expr_to_c(arg, scope))
-                                args_typed.push((return_type.clone(), "".to_string()));
-                            },
-                            TypedExpr::Operation { a, op, b, return_type } => {
-                                args_typed.push((return_type.clone(), "".to_string()));
-
-                            }
-                            other => {
-                                panic!("codegen: expr not implemented! GOT:{:?}", other)
-                            }
-                        }
-                        
-                        // args_typed.push(format!("{} {}", var_type_to_c(&var_type), var_name));
-                    }
-
+                }
+                _ => {    
                     let mut cool_str = format!("{}(", mangle_func_name(name, &args_typed));
                     for (i, expr) in args.iter().enumerate() {
                         if i > 0 {
                             cool_str += ", ";
                         }
-                        cool_str += &expr_to_c(expr, scope);
+                        cool_str += &expr_to_c(expr);
                     };
                     cool_str += ")";
                     cool_str
@@ -134,46 +103,35 @@ pub fn expr_to_c(expr: &TypedExpr, scope: &Vec<HashMap<String, VarType>>) -> Str
     }
 }
 
-pub fn stmt_to_c(stmt: &TypedStmt, scope: &mut Vec<HashMap<String, VarType>>) -> String {
+pub fn stmt_to_c(stmt: &TypedStmt) -> String {
     match stmt {
         TypedStmt::Variable { var_name, var_type, var_value } => {
-            scope.last_mut().unwrap().insert(var_name.to_string(), var_type.clone());
-            return format!("{} {} = {};\n", var_type_to_c(var_type), var_name, expr_to_c(var_value, scope))
+            return format!("{} {} = {};\n", var_type_to_c(var_type), var_name, expr_to_c(var_value))
         },
-        TypedStmt::Assignment { var_name, new_value, var_type } => format!("{} = {};\n", var_name, expr_to_c(new_value, scope)),
-        TypedStmt::PressF { var_name } => format!("/* F {}; <- this is just a placholder for now */\n", var_name),
-        TypedStmt::Expr(expr) => format!("{};\n", expr_to_c(expr, scope)),
+        TypedStmt::Assignment { var_name, new_value, var_type } => format!("{} = {};\n", var_name, expr_to_c(new_value)),
+        TypedStmt::PressF { var_name } => format!("/* F {}; <- this is just a placeholder for now */\n", var_name),
+        TypedStmt::Expr(expr) => format!("{};\n", expr_to_c(expr)),
         TypedStmt::FnDecl { fn_name, params, body , returns} => {
-            scope.push(HashMap::new());
             let mut body_as_str = String::new();
-            let mut params_c = Vec::new();
-            for (var_type, var_name) in params {
-                scope.last_mut().unwrap().insert(var_name.to_string(), var_type.clone());
-                params_c.push(format!("{} {}", var_type_to_c(&var_type), var_name));
-            }
             for stmt in body {
-                body_as_str.push_str(&stmt_to_c(stmt, scope));
+                body_as_str.push_str(&stmt_to_c(stmt));
             }
-            scope.pop();
-            format!("{} {}({})", var_type_to_c(returns), mangle_func_name(fn_name, params), params_c.join(", ")) + "{\n" + &body_as_str + "return 0;\n}"
+            format!("{} {}({})", var_type_to_c(returns), mangle_func_name(fn_name, params), parse_fparams(params)) + "{\n" + &body_as_str + "return 0;\n}"
         },
-        TypedStmt::Return { value } => format!("return {};\n", expr_to_c(value, scope)),
+        TypedStmt::Return { value } => format!("return {};\n", expr_to_c(value)),
         TypedStmt::IfElse { condition, true_branch, false_branch } => {
-            scope.push(HashMap::new());
-            let mut ifelse_final = format!("if ({}) {}\n", expr_to_c(condition, scope), '{');
+            let mut ifelse_final = format!("if ({}) {}\n", expr_to_c(condition), '{');
             for stmt in true_branch {
-                ifelse_final.push_str(&stmt_to_c(stmt, scope));
+                ifelse_final.push_str(&stmt_to_c(stmt));
             }
             ifelse_final.push_str("}\n");
             if let Some(else_stmts) = false_branch {
                 ifelse_final.push_str("else {\n");
                 for stmt in else_stmts {
-                    ifelse_final.push_str(&stmt_to_c(&stmt, scope));
+                    ifelse_final.push_str(&stmt_to_c(&stmt));
                 }
                 ifelse_final.push_str("}\n");
             }
-            scope.pop();
-
             ifelse_final
         },
         _ => panic!("codegen: stmt not implemented!!! GOT:{:?}", stmt)
@@ -182,23 +140,35 @@ pub fn stmt_to_c(stmt: &TypedStmt, scope: &mut Vec<HashMap<String, VarType>>) ->
 
 pub fn generate_c_code(stmts: &Vec<TypedStmt>) -> String {
     let mut c_code = String::from("// CODE GENERATED WITH C± TO C TRANSLATOR!!! NOT FOR MANUAL EDITING!\n#include <stdio.h>\n#include <stdbool.h>\n\n");
-    let mut scope: Vec<HashMap<String, VarType>> = Vec::new();
 
-    scope.push(HashMap::new());
+    c_code.push_str("// FUNC PROTOTYPES!!!\n");
+    for stmt in stmts {
+        if let TypedStmt::FnDecl { fn_name, params, body, returns } = stmt {
+            // c_code.push_str(&stmt_to_c(stmt));
+            if params.len() == 0 {
+                c_code.push_str(&format!("{} {}(void);\n", var_type_to_c(returns), mangle_func_name(fn_name, params)));
+            }
+            else {
+                c_code.push_str(&format!("{} {}({});\n", var_type_to_c(returns), mangle_func_name(fn_name, params), parse_fparams(params)));
+            }
+        }
+    }
 
+    c_code.push_str("\n// FUNCS!!!\n");
+    
     for stmt in stmts {
         if let TypedStmt::FnDecl { .. } = stmt {
-            c_code.push_str(&stmt_to_c(stmt, &mut scope));
+            c_code.push_str(&stmt_to_c(stmt));
             c_code.push_str("\n\n");
         }
     }
 
-    c_code.push_str("\n\nint main() {\n");
+    c_code.push_str("\n// CODE!!!\nint main() {\n");
 
     for stmt in stmts {
         if let TypedStmt::FnDecl { .. } = stmt {}
         else {
-            c_code.push_str(&stmt_to_c(stmt, &mut scope));
+            c_code.push_str(&stmt_to_c(stmt));
         }
     }
 
