@@ -80,7 +80,12 @@ fn main() {
     let outc_path = build_dir.to_string() + "/out.c";
     let build_path = if cfg!(windows) {  build_dir.to_string() + "/out.exe" } else { build_dir.to_string() + "/out" };
     fs::write(&outc_path, &c_code).expect("failed to write out.c");
-    let status = Command::new("gcc").arg("-Iruntime").args([&outc_path, &runtime_path, "-o", &build_path]).status();
+    let mut build_cmd = Command::new("gcc");
+    build_cmd.arg("-Iruntime").args([&outc_path, &runtime_path, "-o", &build_path]);
+    if cfg!(windows) {
+        build_cmd.arg("-lbcrypt");
+    }
+    let status = build_cmd.status();
     match status {
         Ok(s) if s.success() => println!("built out"),
         _ => panic!("failed to build out.c")
