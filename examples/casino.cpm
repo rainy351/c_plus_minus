@@ -1,0 +1,44 @@
+include <std.xd>;
+
+func gamble(manual int wager): int {
+    idk p = random()%100;           // when you do `a%b`, you always get
+                                    // a value between 0 and b. convenient!
+    
+    // 60% chance to lose money
+    if (p < 60) {
+        wager = wager - random()%wager - 1;
+    }
+    // 40% chance to get money
+    else {
+        wager = wager + random()%wager - 1;
+    }
+    return wager;
+}
+
+idk start_money = 100;
+idk current_money = start_money;
+
+// even kids can play!
+while (current_money > 0) {
+    print("your money: ");
+    println(current_money);
+    print("what's your wager: ");
+    idk wager = read_int();
+    if (current_money < wager) {
+        println("you dont have this much money!");
+    }
+    else {
+        idk gamble_res = gamble(current_money);
+        stonks (gamble_res > current_money) {
+            print("You won ");
+            print(gamble_res-current_money);
+            println("!");
+            current_money = gamble_res;
+        } not_stonks {
+            print("You lost ");
+            print(current_money - gamble_res);
+            println("!");
+            current_money = gamble_res;
+        }
+    }
+}
