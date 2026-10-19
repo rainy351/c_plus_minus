@@ -1,5 +1,3 @@
-use std::panic;
-
 use crate::{ast::{Expr, Stmt, VarType}, lexer::Token};
 use crate::ast::Ops;
 
@@ -376,7 +374,7 @@ impl Parser {
                 Stmt::Stonks { condition: cond, stonks_branch: stonks_stmts, not_stonks_branch: not_stonks_stmts }
             },
             Some(Token::NotStonks) => {
-                panic!("parser: unexpected `not_stonks` block. did you forget `if`?")
+                panic!("parser: unexpected `not_stonks` block. did you forget `stonks`?")
             },
             Some(Token::While) => {
                 self.advance();
