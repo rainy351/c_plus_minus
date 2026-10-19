@@ -130,6 +130,14 @@ pub fn stmt_to_c(stmt: &TypedStmt) -> String {
             }
             ifelse_final
         },
+        TypedStmt::While { condition, body } => {
+            let mut while_final = format!("while ({}) {}\n", expr_to_c(condition), '{');
+            for stmt in body {
+                while_final.push_str(&stmt_to_c(stmt));
+            }
+            while_final.push_str("}\n");
+            while_final
+        },
     }
 }
 

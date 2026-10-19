@@ -52,6 +52,10 @@ pub enum TypedStmt {
         true_branch: Vec<TypedStmt>,
         false_branch: Option<Vec<TypedStmt>>,
     },
+    While {
+        condition: TypedExpr,
+        body: Vec<TypedStmt>,
+    },
     Expr(TypedExpr),
 }
 
@@ -223,6 +227,16 @@ impl TypeChecker {
                     None => { None }
                 };
                 TypedStmt::IfElse { condition: t_condition, true_branch: t_true_branch, false_branch: t_false_branch }
+            },
+            Stmt::While { condition, body } => {
+                let t_condition = self.convert_expr(condition);
+                self.scopes.push(HashMap::new());
+                let mut t_body = Vec::new();
+                for stmt in body {
+                    t_body.push(self.convert_stmt(stmt, expected_return));
+                }
+                self.scopes.pop();
+                TypedStmt::While { condition: t_condition, body: t_body }
             },
             Stmt::PressF { var_name } => {
                 TypedStmt::PressF { var_name }

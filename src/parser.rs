@@ -317,6 +317,35 @@ impl Parser {
             Some(Token::Else) => {
                 panic!("parser: unexpected `else` block. did you forget `if`?")
             },
+            Some(Token::While) => {
+                self.advance();
+                if self.peek() != Some(&Token::LParen) {
+                    panic!("parser: expected `(` after `while`");
+                }
+                self.advance();
+                let cond = self.parse_expr();
+                if self.peek() != Some(&Token::RParen) {
+                    panic!("parser: expected `)` closing condition in `while`");
+                }
+                self.advance();
+
+                
+                if self.peek() != Some(&Token::LBrace) {
+                    panic!("parser: expected `{}` after condition in `while`", '{');
+                }
+                self.advance();
+
+                let mut body = Vec::new();
+                while self.peek().is_some() && self.peek() != Some(&Token::RBrace) {
+                    body.push(self.parse_stmt());
+                }
+                if self.peek() != Some(&Token::RBrace) {
+                    panic!("parser: expected closing `{}` after stmts in `while`", '}')
+                }
+                self.advance();
+
+                Stmt::While { condition: cond, body: body }
+            },
             _ => panic!("parser: idk what to do ({:?}) :(", self.peek().unwrap())
         }
     }

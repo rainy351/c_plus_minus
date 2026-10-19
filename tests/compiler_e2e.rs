@@ -294,3 +294,18 @@ fn modulo() {
     );
 }
 
+#[test]
+fn while_test() {
+    run_ok(
+        r#"
+            idk a = 0;
+            while(a<5) {
+                a = a+1;
+                __builtin_sys_print(a);
+            }
+            __builtin_sys_print("end");
+        "#,
+        "12345end",
+    );
+}
+
