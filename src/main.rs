@@ -47,7 +47,7 @@ fn main() {
     let typed_ast = checker.typecheck();
 
     
-    println!("\nMother-stupid-fucking-stupidized-typized-edestest AST:");
+    println!("\nTypized AST:");
     for (i, stmt) in typed_ast.iter().enumerate() {
         println!("{}: {:?}", i + 1, stmt);
     }

@@ -1,5 +1,5 @@
 // Standard Library of C± (std.xd)
-manual string C_PLUS_MINUS_VERSION = "0.1";
+manual string C_PLUS_MINUS_VERSION = "0.2";
 
 func print(manual int msg): int {
     __builtin_sys_print(msg);
