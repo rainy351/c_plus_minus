@@ -34,3 +34,4 @@ if(val1 > val2) {
     print("diff: ");
     println(val2-val1);
 }
+val2 = 5;

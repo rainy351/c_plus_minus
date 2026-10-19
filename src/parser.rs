@@ -1,5 +1,3 @@
-use core::panic;
-
 use crate::{ast::{Expr, Stmt, VarType}, lexer::Token};
 use crate::ast::Ops;
 
@@ -20,7 +18,7 @@ impl Parser {
     pub fn advance(&mut self) -> Option<&Token> {
         let token = self.tokens.get(self.pos);
         self.pos += 1;
-        return token;
+        token
     }
 
     pub fn expect_ident(&mut self) -> String {
@@ -71,7 +69,7 @@ impl Parser {
                         }
                     }
                     self.advance();
-                    Expr::Call { name: name, args: args }
+                    Expr::Call { name, args }
                 }
                 else { Expr::VarIdent(name) }
             },
@@ -106,7 +104,7 @@ impl Parser {
                     }
                 }
 
-                return lib_name;
+                lib_name
             },
             _ => {
                 panic!("no libname???");
@@ -180,7 +178,24 @@ impl Parser {
                 
                 Stmt::Variable { var_name, var_type, var_value }
             },
-            Some(Token::Ident(_)) | Some(Token::Number(_)) | Some(Token::StringLit(_)) => {
+            Some(Token::Ident(var_name)) => {
+                let v = var_name.clone();
+                let expr = self.parse_expr();
+                if self.peek() == Some(&Token::Semicolon) {
+                    self.advance();
+                    Stmt::Expr(expr)
+                }
+                else if self.peek() == Some(&Token::Assign) {
+                    self.advance();
+                    let new_value = self.parse_expr();
+                    self.advance();
+                    Stmt::Assignment { var_name: v, new_value: new_value }
+                }
+                else {
+                    panic!("parser: expected a semicolon `;` after expression. GOT:{:?}", self.peek())
+                }
+            }
+            Some(Token::Number(_)) | Some(Token::StringLit(_)) => {
                 let expr = self.parse_expr();
                 if self.peek() == Some(&Token::Semicolon) {
                     self.advance();
@@ -235,7 +250,7 @@ impl Parser {
                 }
                 self.advance();
 
-                Stmt::FnDecl { fn_name: name, params: args, body: body, returns: returns }
+                Stmt::FnDecl { fn_name: name, params: args, body, returns }
             },
             Some(Token::Return) => {
                 self.advance();
@@ -244,7 +259,7 @@ impl Parser {
                     panic!("parser: expected semicolon after return. GOT:{:?}", self.peek())
                 }
                 self.advance();
-                Stmt::Return { value: value }
+                Stmt::Return { value }
             },
             Some(Token::If) => {
                 self.advance();
@@ -314,9 +329,9 @@ impl Parser {
             };
             self.advance();
             let right = self.parse_primary();
-            left = Expr::Operation { a: Box::new(left), op: op, b: Box::new(right) };
+            left = Expr::Operation { a: Box::new(left), op, b: Box::new(right) };
         }
-        return left;
+        left
     }
 
     pub fn parse_expr(&mut self) -> Expr {
@@ -334,9 +349,9 @@ impl Parser {
             };
             self.advance();
             let right = self.parse_expr_deep();
-            left = Expr::Operation { a: Box::new(left), op: op, b: Box::new(right) };
+            left = Expr::Operation { a: Box::new(left), op, b: Box::new(right) };
         }
-        return left;
+        left
     }
 
     pub fn parse_tokens(&mut self) -> Vec<Stmt> {
@@ -344,6 +359,6 @@ impl Parser {
         while self.peek().is_some() {
             stmts.push(self.parse_stmt());
         }
-        return stmts;
+        stmts
     }
 }

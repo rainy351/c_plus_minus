@@ -1,4 +1,4 @@
-use std::{collections::HashMap, mem::take, panic, unreachable};
+use std::{collections::HashMap};
 use crate::ast::{Expr, Ops, Stmt, VarType};
 
 
@@ -57,18 +57,14 @@ pub enum TypedStmt {
 
 
 struct FuncSignature {
-    name: String,
-    args: Vec<VarType>,
     returns: VarType,
 }
 
 impl FuncSignature {
-    fn new(name: &String, args: &Vec<(VarType, String)>, returns: &VarType) -> FuncSignature {
-        let mut args_new = Vec::new();
-        for (avtype, _) in args {
-            args_new.push(avtype.clone());
+    fn new(returns: &VarType) -> FuncSignature {
+        FuncSignature{
+            returns: returns.clone()
         }
-        FuncSignature{name: name.clone(), args: args_new, returns: returns.clone()}
     }
 }
 
@@ -79,7 +75,7 @@ pub struct TypeChecker {
 }
 
 impl TypeChecker {
-    pub fn new(mut ast: Vec<Stmt>) -> TypeChecker{
+    pub fn new(ast: Vec<Stmt>) -> TypeChecker{
         let mut scopes: Vec<HashMap<String, VarType>> = Vec::new();
         scopes.push(HashMap::new());
 
@@ -87,8 +83,8 @@ impl TypeChecker {
 
         let mut checker = TypeChecker { 
             ast: Vec::<TypedStmt>::new(),
-            scopes: scopes,
-            fsigns: fsigns 
+            scopes,
+            fsigns 
         };
         checker.convert_ast(ast);
         checker
@@ -98,19 +94,10 @@ impl TypeChecker {
         match e {
             TypedExpr::Number(_) => VarType::TypeInt,
             TypedExpr::StringLit(_) => VarType::TypeString,
-            TypedExpr::VarIdent { name, var_type } => var_type.clone(),
-            TypedExpr::Operation { a, op, b , return_type} => { return_type.clone() },
-            TypedExpr::Call { name, args , return_type} => return_type.clone(),
-            _ => panic!("typechecker: cant convert expr to VarType:{:?}", e)
+            TypedExpr::VarIdent { name: _, var_type } => var_type.clone(),
+            TypedExpr::Operation { a: _, op: _, b: _ , return_type} => { return_type.clone() },
+            TypedExpr::Call { name: _, args: _ , return_type} => return_type.clone(),
         }
-    }
-
-    fn texprs_to_vartypes(&self, exprs: Vec<TypedExpr>) -> Vec<VarType> {
-        let mut exprs_parsed = Vec::new();
-        for a in exprs {
-            exprs_parsed.push(self.texpr_to_vartype(&a));
-        }
-        exprs_parsed
     }
 
     fn convert_expr(&mut self, expr: Expr) -> TypedExpr {
@@ -131,14 +118,7 @@ impl TypeChecker {
                             TypedExpr::Operation { a: Box::new(typed_a), op, b: Box::new(typed_b), return_type: VarType::TypeInt }
                         },
                         VarType::TypeString => {
-                            match op {
-                                // wait for it :(
-                                // Ops::Plus => TypedExpr::Operation { a: Box::new(typed_a), op, b: Box::new(typed_b), return_type: VarType::TypeString },
-                                // Ops::Mult => TypedExpr::Operation { a: Box::new(typed_a), op, b: Box::new(typed_b), return_type: VarType::TypeString },
-                                _ => {
-                                    panic!("typechecker: op {:?} is not supported for type {:?}", op, a_t)
-                                }
-                            }
+                            panic!("typechecker: op {:?} is not supported for type {:?}", op, a_t)
                         }
                         VarType::Idk => {
                             panic!("typechecker: how did idk type get into typedast op lol?")
@@ -165,7 +145,7 @@ impl TypeChecker {
                     panic!("typechecker: func {:?} not found!", s.0)
                 }
                 let return_type = fsign.expect("typechecker: cannot unpack return_type").returns.clone();
-                TypedExpr::Call { name: s.0, args: targs, return_type: return_type }
+                TypedExpr::Call { name: s.0, args: targs, return_type }
             },
         }
     }
@@ -178,16 +158,15 @@ impl TypeChecker {
 
     fn convert_stmt(&mut self, stmt: Stmt, expected_return: Option<&VarType>) -> TypedStmt {
         match stmt {
-            Stmt::Include { lib_name } => { unreachable!() },
+            Stmt::Include { lib_name: _ } => { unreachable!() },
             Stmt::Variable { var_name, var_type, var_value } => {
                 let t = self.convert_expr(var_value);
                 self.check_scope(&var_name);
                 let val_type = self.texpr_to_vartype(&t);
-                if var_type != VarType::Idk {
-                    if val_type != var_type {
+                if var_type != VarType::Idk
+                    && val_type != var_type {
                        panic!("typechecker: tried to assign value of type {:?} to a {:?} type var", val_type, var_type)
                     }
-                }
                 self.scopes.last_mut().unwrap().insert(var_name.clone(), val_type.clone());
                 TypedStmt::Variable { var_name, var_type: val_type, var_value: t}
             },
@@ -197,7 +176,7 @@ impl TypeChecker {
                 if var_type != self.texpr_to_vartype(&t_value) {
                     panic!("typechecker: tried to assign value of type {:?} to a {:?} type var", self.texpr_to_vartype(&t_value), var_type)
                 }
-                TypedStmt::Assignment { var_name: var_name, new_value: t_value, var_type: var_type}
+                TypedStmt::Assignment { var_name, new_value: t_value, var_type}
             },
             Stmt::Expr(expr) => {
                 TypedStmt::Expr(self.convert_expr(expr))
@@ -246,12 +225,12 @@ impl TypeChecker {
                 TypedStmt::IfElse { condition: t_condition, true_branch: t_true_branch, false_branch: t_false_branch }
             },
             Stmt::PressF { var_name } => {
-                TypedStmt::PressF { var_name: var_name }
+                TypedStmt::PressF { var_name }
             },
         }
     }
 
-    fn convert_ast(&mut self, mut ast: Vec<Stmt>) {
+    fn convert_ast(&mut self, ast: Vec<Stmt>) {
         for stmt in ast {
             let typed_stmt = self.convert_stmt(stmt, None);
             self.ast.push(typed_stmt);
@@ -261,21 +240,18 @@ impl TypeChecker {
     fn get_fsigns(ast: &Vec<Stmt>) -> HashMap<(String, Vec<VarType>), FuncSignature> {
         let mut fsigns = HashMap::new();
         let builtin_print = "__builtin_sys_print".to_string();
-        fsigns.insert((builtin_print.clone(), vec![VarType::TypeInt]), FuncSignature::new(&builtin_print, &vec![(VarType::TypeInt, "int".to_string())], &VarType::TypeInt));
-        fsigns.insert((builtin_print.clone(), vec![VarType::TypeString]), FuncSignature::new(&builtin_print, &vec![(VarType::TypeString, "text".to_string())], &VarType::TypeString));
+        fsigns.insert((builtin_print.clone(), vec![VarType::TypeInt]), FuncSignature::new(&VarType::TypeInt));
+        fsigns.insert((builtin_print.clone(), vec![VarType::TypeString]), FuncSignature::new(&VarType::TypeString));
         for stmt in ast {
-            match stmt {
-                Stmt::FnDecl { fn_name, params, body, returns } => {
-                    let mut args = Vec::new();
-                    for (vt, s) in params {
-                        args.push(vt.clone());
-                    }
-                    fsigns.insert((fn_name.to_string(), args), FuncSignature::new(fn_name, params, returns));
+            if let Stmt::FnDecl { fn_name, params, body: _, returns } = stmt {
+                let mut args = Vec::new();
+                for (vt, _) in params {
+                    args.push(vt.clone());
                 }
-                _ => {}
+                fsigns.insert((fn_name.to_string(), args), FuncSignature::new(returns));
             }
         }
-        return fsigns;
+        fsigns
     }
 
     fn get_var_type(&self, name: &String) -> VarType{
@@ -284,7 +260,7 @@ impl TypeChecker {
                 return scope.get(name).unwrap().clone();
             }
         }
-        return panic!("codegen: var {:?} not found in this scope. SCOPE:{:?}", name, self.scopes);
+        panic!("codegen: var {:?} not found in this scope. SCOPE:{:?}", name, self.scopes)
     }
 
     pub fn typecheck(&self) -> &Vec<TypedStmt> {

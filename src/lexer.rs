@@ -18,7 +18,7 @@ pub enum Token {
     // это я чуть позже добавлю
     Shrug,          // ¯\_(ツ)_/¯
     KonamiCode,     // ↑↑↓↓←→←→BA
-    Scope(usize),   // (: :) с подсчетом пробелов
+    // Scope(usize),   // (: :) с подсчетом пробелов
 
     // 2. Литералы и идентификаторы с данными
     Ident(String),       // Имя переменной или функции
@@ -43,7 +43,7 @@ pub enum Token {
     RBrace,       // }
     Gt,           // >
     Lt,           // <
-    Output,       // ><
+    // Output,       // ><
 
     // 4. На время разработки
     NotImplemented,
@@ -195,5 +195,5 @@ pub fn tokenize(source_code: &str) -> Vec<Token> {
         }
     }
 
-    return tokens
+    tokens
 }

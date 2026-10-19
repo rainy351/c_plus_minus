@@ -31,7 +31,7 @@ fn main() {
     for stmt in stmts {
         match stmt {
             Stmt::Include { lib_name } => {
-                let lib_source_code = fs::read_to_string(lib_name.clone()).expect(&format!("main: error reading file: {}", lib_name));
+                let lib_source_code = fs::read_to_string(lib_name.clone()).unwrap_or_else(|_| panic!("main: error reading file: {}", lib_name));
                 let lib_tokens = tokenize(&lib_source_code);
                 let mut lib_parser = Parser::new(lib_tokens);
                 let lib_stmts = lib_parser.parse_tokens();
@@ -43,7 +43,7 @@ fn main() {
     
     final_stmts.extend(main_stmts);
 
-    let mut checker = typechecker::TypeChecker::new(final_stmts);
+    let checker = typechecker::TypeChecker::new(final_stmts);
     let typed_ast = checker.typecheck();
 
     
