@@ -61,10 +61,26 @@ fn main() {
 
     let build_dir = "build";
     fs::create_dir_all(build_dir).expect("cannot create build directory");
+
+    let runtime_dir = "runtime";
+    let runtime_path = runtime_dir.to_string() + "/cpm_runtime.o";
+    if std::path::Path::new(&runtime_path).is_file() {
+        println!("runtime found");
+    } else {
+        // panic!("Рантайм не найден");
+        let runtime_c = runtime_dir.to_string() + "/cpm_runtime.c";
+        let runtime_o = runtime_dir.to_string() + "/cpm_runtime.o";
+        
+        let status = Command::new("gcc").args(["-c", &runtime_c, "-o", &runtime_o]).status();
+        match status {
+            Ok(s) if s.success() => println!("built cpm_runtime.o"),
+            _ => panic!("failed to build Cpm runtime")
+        }
+    }
     let outc_path = build_dir.to_string() + "/out.c";
-    let build_path = if cfg!(windows) { build_dir.to_string() + "/out.exe" } else { build_dir.to_string() + "/out" };
+    let build_path = if cfg!(windows) {  build_dir.to_string() + "/out.exe" } else { build_dir.to_string() + "/out" };
     fs::write(&outc_path, &c_code).expect("failed to write out.c");
-    let status = Command::new("gcc").arg("-Iruntime").args([&outc_path, "runtime/cpm_runtime.c", "-o", &build_path]).status();
+    let status = Command::new("gcc").arg("-Iruntime").args([&outc_path, &runtime_path, "-o", &build_path]).status();
     match status {
         Ok(s) if s.success() => println!("built out"),
         _ => panic!("failed to build out.c")

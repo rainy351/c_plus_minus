@@ -8,7 +8,9 @@ use std::path::{Path, PathBuf};
 use std::process::{self, Command, Output};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::{SystemTime, UNIX_EPOCH};
+use std::sync::OnceLock;
 
+static RUNTIME_O: OnceLock<PathBuf> = OnceLock::new();
 static TEST_ID: AtomicUsize = AtomicUsize::new(0);
 
 struct TestDir(PathBuf);
@@ -27,12 +29,36 @@ impl TestDir {
         fs::create_dir_all(&dir).expect("cannot create test directory");
         let runtime = dir.join("runtime");
         fs::create_dir_all(&runtime).unwrap();
-        for file in ["cpm_runtime.c", "cpm_runtime.h"] {
-            fs::copy(
-                Path::new(env!("CARGO_MANIFEST_DIR")).join("runtime").join(file),
-                runtime.join(file),
-            ).unwrap();
-        }
+
+        let source_runtime = Path::new(env!("CARGO_MANIFEST_DIR")).join("runtime");
+
+        let runtime_o = RUNTIME_O.get_or_init(|| {
+            let prebuilt = source_runtime.join("cpm_runtime.o");
+
+            if prebuilt.is_file() {
+                return prebuilt;
+            }
+
+            let output = Command::new("gcc")
+                .current_dir(&source_runtime)
+                .args(["-c", "cpm_runtime.c", "-o", "cpm_runtime.o"])
+                .output()
+                .unwrap();
+
+            assert!(
+                output.status.success(),
+                "runtime compilation failed:\n{}",
+                String::from_utf8_lossy(&output.stderr)
+            );
+
+            source_runtime.join("cpm_runtime.o")
+        });
+
+        fs::copy(runtime_o, runtime.join("cpm_runtime.o")).unwrap();
+        fs::copy(
+            source_runtime.join("cpm_runtime.h"),
+            runtime.join("cpm_runtime.h"),
+        ).unwrap();
         Self(dir)
     }
 
