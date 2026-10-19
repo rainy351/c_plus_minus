@@ -82,7 +82,23 @@ pub fn expr_to_c(expr: &TypedExpr) -> String {
                         },
                         VarType::Idk => unreachable!()
                     }
-                }
+                },
+                "__builtin_sys_read_int" => {
+                    if args.len() > 0 { panic!("codegen: sorry pal, `__builtin_sys_read_int__` does not support args") }
+                    return format!("cpm_read_int()");
+                },
+                "__builtin_sys_read_str" => {
+                    if args.len() > 0 { panic!("codegen: sorry pal, `__builtin_sys_read_str__` does not support args") }
+                    return format!("cpm_read_str()");
+                },
+                "__builtin_sys_time" => {
+                    if args.len() > 0 { panic!("codegen: sorry pal, `__builtin_sys_time` does not support args") }
+                    return format!("cpm_time()");
+                },
+                "__builtin_sys_rand" => {
+                    if args.len() > 0 { panic!("codegen: sorry pal, `__builtin_sys_rand` does not support args") }
+                    return format!("cpm_random()");
+                },
                 _ => {    
                     let mut cool_str = format!("{}(", mangle_func_name(name, &args_typed));
                     for (i, expr) in args.iter().enumerate() {

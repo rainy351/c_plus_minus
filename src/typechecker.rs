@@ -277,6 +277,15 @@ impl TypeChecker {
         let builtin_print = "__builtin_sys_print".to_string();
         fsigns.insert((builtin_print.clone(), vec![VarType::TypeInt]), FuncSignature::new(&VarType::TypeInt));
         fsigns.insert((builtin_print.clone(), vec![VarType::TypeString]), FuncSignature::new(&VarType::TypeString));
+        let builtin_read_int = "__builtin_sys_read_int".to_string();
+        fsigns.insert((builtin_read_int.clone(), vec![]), FuncSignature::new(&VarType::TypeInt));
+        let builtin_read_str = "__builtin_sys_read_str".to_string();
+        fsigns.insert((builtin_read_str.clone(), vec![]), FuncSignature::new(&VarType::TypeString));
+        let builtin_time = "__builtin_sys_time".to_string();
+        fsigns.insert((builtin_time.clone(), vec![]), FuncSignature::new(&VarType::TypeInt));
+        let builtin_rand = "__builtin_sys_rand".to_string();
+        fsigns.insert((builtin_rand.clone(), vec![]), FuncSignature::new(&VarType::TypeInt));
+        
         for stmt in ast {
             if let Stmt::FnDecl { fn_name, params, body: _, returns } = stmt {
                 let mut args = Vec::new();

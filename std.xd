@@ -19,18 +19,18 @@ func println(manual string msg): int {
     __builtin_sys_print("\n");
 }
 
-// func read_int() {
-//     return __builtin_sys_read_int();
-// }
-// 
-// func read_str() {
-//     return __builtin_sys_read_str();
-// }
-// 
-// func time() {
-//     return __builtin_sys_time();
-// }
-// 
-// func random() {
-//     return __builtin_sys_rand();
-// }
+func read_int(): int {
+    return __builtin_sys_read_int();
+}
+
+func read_str(): string {
+    return __builtin_sys_read_str();
+}
+
+func time(): int {
+    return __builtin_sys_time();
+}
+
+func random(): int {
+    return __builtin_sys_rand();
+}
