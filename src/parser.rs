@@ -188,7 +188,12 @@ impl Parser {
                 else if self.peek() == Some(&Token::Assign) {
                     self.advance();
                     let new_value = self.parse_expr();
-                    self.advance();
+                    if self.peek() != Some(&Token::Semicolon) {
+                        panic!("parser: no semicolon???")
+                    }
+                    else {
+                        self.advance();
+                    }
                     Stmt::Assignment { var_name: v, new_value: new_value }
                 }
                 else {
