@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "с_plus_minus"
-version = "0.0.1"
+name = "c_plus_minus"
+version = "0.0.2"

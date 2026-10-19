@@ -71,7 +71,7 @@ impl TestDir {
     }
 
     fn compile(&self) -> Output {
-        Command::new(env!("CARGO_BIN_EXE_с_plus_minus"))
+        Command::new(env!("CARGO_BIN_EXE_c_plus_minus"))
             .arg("main.cpm")
             .current_dir(self.path())
             .output()
