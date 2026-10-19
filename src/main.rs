@@ -59,10 +59,14 @@ fn main() {
     println!("{}", c_code);
     println!("```\n");
 
-    fs::write("out.c", &c_code).expect("failed to write out.c");
-    let status = Command::new("gcc").args(["out.c", "-o", if cfg!(windows) { "out.exe" } else { "out" }]).status();
+    let build_dir = "build";
+    fs::create_dir_all(build_dir).expect("cannot create build directory");
+    let outc_path = build_dir.to_string() + "/out.c";
+    let build_path = if cfg!(windows) { build_dir.to_string() + "/out.exe" } else { build_dir.to_string() + "/out" };
+    fs::write(&outc_path, &c_code).expect("failed to write out.c");
+    let status = Command::new("gcc").arg("-Iruntime").args([&outc_path, "runtime/cpm_runtime.c", "-o", &build_path]).status();
     match status {
-        Ok(s) if s.success() => println!("built out.exe"),
+        Ok(s) if s.success() => println!("built out"),
         _ => panic!("failed to build out.c")
     }
 }

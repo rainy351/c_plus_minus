@@ -75,10 +75,10 @@ pub fn expr_to_c(expr: &TypedExpr) -> String {
                     let (var_type, _var_name) = args_typed.first().expect("codegen: at least 1 arg expected at: `__builtin_sys_print`");
                     match var_type {
                         VarType::TypeInt => {
-                            format!("printf(\"%lld\", {})", expr_to_c(arg))
+                            format!("cpm_print_int({})", expr_to_c(arg))
                         },
                         VarType::TypeString => {
-                            format!("printf(\"%s\", {})", expr_to_c(arg))
+                            format!("cpm_print_str({})", expr_to_c(arg))
                         },
                         VarType::Idk => unreachable!()
                     }
@@ -154,7 +154,7 @@ pub fn stmt_to_c(stmt: &TypedStmt) -> String {
 }
 
 pub fn generate_c_code(stmts: &Vec<TypedStmt>) -> String {
-    let mut c_code = String::from("// CODE GENERATED WITH C± TO C TRANSLATOR!!! NOT FOR MANUAL EDITING!\n#include <stdio.h>\n#include <stdbool.h>\n\n");
+    let mut c_code = String::from("// CODE GENERATED WITH C± TO C TRANSLATOR!!! NOT FOR MANUAL EDITING!\n#include \"cpm_runtime.h\"\n\n");
 
     c_code.push_str("// FUNC PROTOTYPES!!!\n");
     for stmt in stmts {
@@ -178,6 +178,7 @@ pub fn generate_c_code(stmts: &Vec<TypedStmt>) -> String {
     }
 
     c_code.push_str("\n// CODE!!!\nint main() {\n");
+    c_code.push_str("cpm_init();\n\n");
 
     for stmt in stmts {
         if let TypedStmt::FnDecl { .. } = stmt {}

@@ -25,6 +25,14 @@ impl TestDir {
             process::id()
         ));
         fs::create_dir_all(&dir).expect("cannot create test directory");
+        let runtime = dir.join("runtime");
+        fs::create_dir_all(&runtime).unwrap();
+        for file in ["cpm_runtime.c", "cpm_runtime.h"] {
+            fs::copy(
+                Path::new(env!("CARGO_MANIFEST_DIR")).join("runtime").join(file),
+                runtime.join(file),
+            ).unwrap();
+        }
         Self(dir)
     }
 
@@ -75,7 +83,7 @@ fn run_ok_with_files(source: &str, files: &[(&str, &str)], expected: &str) {
         display_output(&compilation)
     );
 
-    let executable = dir.path().join(if cfg!(windows) { "out.exe" } else { "out" });
+    let executable = dir.path().join("build").join(if cfg!(windows) { "out.exe" } else { "out" });
     let execution = Command::new(&executable)
         .current_dir(dir.path())
         .output()
