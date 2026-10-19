@@ -309,3 +309,46 @@ fn while_test() {
     );
 }
 
+#[test]
+fn stonks_test() {
+    run_ok(
+        r#"
+            idk a = 0;
+            stonks(a>5) {
+                __builtin_sys_print(a);
+            } not_stonks {
+                __builtin_sys_print(a+5);
+            }
+        "#,
+        "5",
+    );
+}
+
+#[test]
+fn stonks_missing_block() {
+    compile_error(
+        r#"
+            idk a = 0;
+            stonks(a>5) {
+                __builtin_sys_print(a);
+            }
+        "#,
+        "parser: expected `not_stonks` block after `stonks`",
+    );
+}
+
+#[test]
+fn stonks_wrong_op() {
+    compile_error(
+        r#"
+            idk a = 0;
+            stonks(a<5) {
+                __builtin_sys_print(a);
+            } not_stonks {
+                __builtin_sys_print(a-5);
+            }
+        "#,
+        "parser: `stonks` ALWAYS requires `>` operator. Maybe you meant `if`?",
+    );
+}
+

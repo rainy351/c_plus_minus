@@ -130,6 +130,18 @@ pub fn stmt_to_c(stmt: &TypedStmt) -> String {
             }
             ifelse_final
         },
+        TypedStmt::Stonks { condition, true_branch, false_branch } => {
+            let mut stonks_final = format!("if ({}) {}\n", expr_to_c(condition), '{');
+            for stmt in true_branch {
+                stonks_final.push_str(&stmt_to_c(stmt));
+            }
+            stonks_final.push_str("}\nelse {\n");
+            for stmt in false_branch {
+                stonks_final.push_str(&stmt_to_c(stmt));
+            }
+            stonks_final.push_str("}\n");
+            stonks_final
+        },
         TypedStmt::While { condition, body } => {
             let mut while_final = format!("while ({}) {}\n", expr_to_c(condition), '{');
             for stmt in body {

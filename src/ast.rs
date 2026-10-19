@@ -63,6 +63,11 @@ pub enum Stmt {
         true_branch: Vec<Stmt>,
         false_branch: Option<Vec<Stmt>>,
     },
+    Stonks {
+        condition: Expr,
+        stonks_branch: Vec<Stmt>,
+        not_stonks_branch: Vec<Stmt>,
+    },
     While {
         condition: Expr,
         body: Vec<Stmt>,

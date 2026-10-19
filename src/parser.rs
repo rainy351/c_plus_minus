@@ -1,3 +1,5 @@
+use std::panic;
+
 use crate::{ast::{Expr, Stmt, VarType}, lexer::Token};
 use crate::ast::Ops;
 
@@ -316,6 +318,65 @@ impl Parser {
             },
             Some(Token::Else) => {
                 panic!("parser: unexpected `else` block. did you forget `if`?")
+            },
+            Some(Token::Stonks) => {
+                self.advance();
+                if self.peek() != Some(&Token::LParen) {
+                    panic!("parser: expected `(` after `stonks`");
+                }
+                self.advance();
+                let cond = self.parse_expr();
+                if let Expr::Operation { op, .. } = &cond {
+                    if op != &Ops::Gt {
+                        panic!("parser: `stonks` ALWAYS requires `>` operator. Maybe you meant `if`?")
+                    }
+                }
+                else {
+                        panic!("parser: `stonks` ALWAYS requires `>` operator.")
+                }
+                if self.peek() != Some(&Token::RParen) {
+                    panic!("parser: expected `)` closing condition in `stonks`");
+                }
+                self.advance();
+                
+                if self.peek() != Some(&Token::LBrace) {
+                    panic!("parser: expected `{}` after condition in `stonks`", '{');
+                }
+                self.advance();
+
+                let mut stonks_stmts = Vec::new();
+                while self.peek().is_some() && self.peek() != Some(&Token::RBrace) {
+                    stonks_stmts.push(self.parse_stmt());
+                }
+                if self.peek() != Some(&Token::RBrace) {
+                    panic!("parser: expected closing `{}` after stmts in `stonks`", '}')
+                }
+                self.advance();
+
+                let mut not_stonks_stmts = Vec::new();
+
+                if self.peek() == Some(&Token::NotStonks) {
+                    self.advance();
+                    if self.peek() != Some(&Token::LBrace) {
+                        panic!("parser: expected `{}` after `not_stonks`", '{');
+                    }
+                    self.advance();
+                    while self.peek().is_some() && self.peek() != Some(&Token::RBrace) {
+                        not_stonks_stmts.push(self.parse_stmt());
+                    }
+                    if self.peek() != Some(&Token::RBrace) {
+                        panic!("parser: expected closing `{}` after stmts in `not_stonks`", '}')
+                    }
+                    self.advance();
+                }
+                else {
+                    panic!("parser: expected `not_stonks` block after `stonks`")
+                }
+
+                Stmt::Stonks { condition: cond, stonks_branch: stonks_stmts, not_stonks_branch: not_stonks_stmts }
+            },
+            Some(Token::NotStonks) => {
+                panic!("parser: unexpected `not_stonks` block. did you forget `if`?")
             },
             Some(Token::While) => {
                 self.advance();

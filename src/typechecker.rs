@@ -52,6 +52,11 @@ pub enum TypedStmt {
         true_branch: Vec<TypedStmt>,
         false_branch: Option<Vec<TypedStmt>>,
     },
+    Stonks {
+        condition: TypedExpr,
+        true_branch: Vec<TypedStmt>,
+        false_branch: Vec<TypedStmt>,
+    },
     While {
         condition: TypedExpr,
         body: Vec<TypedStmt>,
@@ -227,6 +232,22 @@ impl TypeChecker {
                     None => { None }
                 };
                 TypedStmt::IfElse { condition: t_condition, true_branch: t_true_branch, false_branch: t_false_branch }
+            },
+            Stmt::Stonks { condition, stonks_branch, not_stonks_branch } => {
+                let t_condition = self.convert_expr(condition);
+                self.scopes.push(HashMap::new());
+                let mut t_stonks_branch = Vec::new();
+                for stmt in stonks_branch {
+                    t_stonks_branch.push(self.convert_stmt(stmt, expected_return));
+                }
+                self.scopes.pop();
+                self.scopes.push(HashMap::new());
+                let mut t_not_stonks_branch = Vec::new();
+                for stmt in not_stonks_branch {
+                    t_not_stonks_branch.push(self.convert_stmt(stmt, expected_return));
+                }
+                self.scopes.pop();
+                TypedStmt::Stonks { condition: t_condition, true_branch: t_stonks_branch, false_branch: t_not_stonks_branch }
             },
             Stmt::While { condition, body } => {
                 let t_condition = self.convert_expr(condition);
