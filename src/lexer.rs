@@ -30,9 +30,8 @@ pub enum Token {
     Plus,         // +
     Minus,        // -
     Mult,         // *
-
     Div,          // /
-
+    Percent,      // %
     Semicolon,    // ;
     Colon,        // :
     Dot,          // .
@@ -70,6 +69,7 @@ pub fn tokenize(source_code: &str) -> Vec<Token> {
                 }
                 else { tokens.push(Token::Div); }
             }
+            '%' => { tokens.push(Token::Percent); chars.next(); }
             '=' => { tokens.push(Token::Assign); chars.next(); }
             ';' => { tokens.push(Token::Semicolon); chars.next(); }
             ':' => { tokens.push(Token::Colon); chars.next(); }

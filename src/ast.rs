@@ -4,6 +4,7 @@ pub enum Ops {
     Minus,
     Mult,
     Div,
+    Mod,
     Gt,
     Lt
 }

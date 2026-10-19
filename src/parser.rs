@@ -328,6 +328,7 @@ impl Parser {
             let op = match self.peek() {
                 Some(Token::Mult) => Ops::Mult,
                 Some(Token::Div) => Ops::Div,
+                Some(Token::Percent) => Ops::Mod,
                 _ => {
                     break;
                 }

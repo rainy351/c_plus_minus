@@ -9,6 +9,7 @@ fn op_to_c(op: &Ops) -> String {
         Ops::Div => "/".to_string(),
         Ops::Lt => "<".to_string(),
         Ops::Gt => ">".to_string(),
+        Ops::Mod => "%".to_string(),
     }
 }
 

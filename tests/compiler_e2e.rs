@@ -281,3 +281,16 @@ fn rejects_missing_semicolon_after_assignment() {
         "parser: no semicolon",
     );
 }
+
+#[test]
+fn modulo() {
+    run_ok(
+        r#"
+            __builtin_sys_print(5/2);
+            __builtin_sys_print(5%2);
+            __builtin_sys_print(5/2*2+5%2);
+        "#,
+        "215",
+    );
+}
+
