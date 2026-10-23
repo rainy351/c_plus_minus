@@ -409,7 +409,7 @@ impl Parser {
         }
     }
 
-    pub fn parse_expr_deep(&mut self) -> Expr {
+    pub fn parse_expr_deepest(&mut self) -> Expr {
         let mut left = self.parse_primary();
         
         while let Some(_token) = self.peek(){
@@ -428,15 +428,48 @@ impl Parser {
         left
     }
 
-    pub fn parse_expr(&mut self) -> Expr {
-        let mut left = self.parse_expr_deep();
+    pub fn parse_expr_deeper(&mut self) -> Expr {
+        let mut left = self.parse_expr_deepest();
         
         while let Some(_token) = self.peek(){
             let op = match self.peek() {
                 Some(Token::Plus) => Ops::Plus,
                 Some(Token::Minus) => Ops::Minus,
+                _ => {
+                    break;
+                }
+            };
+            self.advance();
+            let right = self.parse_expr_deepest();
+            left = Expr::Operation { a: Box::new(left), op, b: Box::new(right) };
+        }
+        left
+    }
+
+    pub fn parse_expr_deep(&mut self) -> Expr {
+        let mut left = self.parse_expr_deeper();
+        
+        while let Some(_token) = self.peek(){
+            let op = match self.peek() {
                 Some(Token::Gt) => Ops::Gt,
                 Some(Token::Lt) => Ops::Lt,
+                _ => {
+                    break;
+                }
+            };
+            self.advance();
+            let right = self.parse_expr_deeper();
+            left = Expr::Operation { a: Box::new(left), op, b: Box::new(right) };
+        }
+        left
+    }
+
+    pub fn parse_expr(&mut self) -> Expr {
+        let mut left = self.parse_expr_deep();
+        
+        while let Some(_token) = self.peek(){
+            let op = match self.peek() {
+                Some(Token::Equals) => Ops::Equals,
                 _ => {
                     break;
                 }

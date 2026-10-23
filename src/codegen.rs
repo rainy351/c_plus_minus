@@ -10,6 +10,7 @@ fn op_to_c(op: &Ops) -> String {
         Ops::Lt => "<".to_string(),
         Ops::Gt => ">".to_string(),
         Ops::Mod => "%".to_string(),
+        Ops::Equals => "==".to_string(),
     }
 }
 

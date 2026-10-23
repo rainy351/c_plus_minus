@@ -27,6 +27,7 @@ pub enum Token {
 
     // 3. Операторы и пунктуация
     Assign,       // =
+    Equals,       // ==
     Plus,         // +
     Minus,        // -
     Mult,         // *
@@ -70,7 +71,15 @@ pub fn tokenize(source_code: &str) -> Vec<Token> {
                 else { tokens.push(Token::Div); }
             }
             '%' => { tokens.push(Token::Percent); chars.next(); }
-            '=' => { tokens.push(Token::Assign); chars.next(); }
+            '=' => {
+                chars.next();
+                if chars.peek() == Some(&'=') {
+                    tokens.push(Token::Equals);
+                    chars.next();
+                } else {
+                    tokens.push(Token::Assign);
+                }
+            }
             ';' => { tokens.push(Token::Semicolon); chars.next(); }
             ':' => { tokens.push(Token::Colon); chars.next(); }
             '.' => { tokens.push(Token::Dot); chars.next(); }
