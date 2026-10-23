@@ -386,3 +386,75 @@ fn stonks_wrong_op() {
     );
 }
 
+#[test]
+fn equals_not_equals_test() {
+    run_ok(
+        r#"
+        __builtin_sys_print(1==1);
+        __builtin_sys_print(1==2);
+        __builtin_sys_print(1!=1);
+        __builtin_sys_print(1!=2);
+        "#,
+        "1001",
+    );
+}
+
+#[test]
+fn equals_not_equals_priority() {
+    run_ok(
+        r#"
+        __builtin_sys_print(1+1==1+1);
+        __builtin_sys_print(1+1==2);
+        __builtin_sys_print(2==1+1);
+        __builtin_sys_print(1+1!=3-1);
+        "#,
+        "1110",
+    );
+}
+
+#[test]
+fn leq_geq() {
+    run_ok(
+        r#"
+        __builtin_sys_print(1+1<=1+1);
+        __builtin_sys_print(1+1<=2+1);
+        __builtin_sys_print(2+1<=1+1);
+        __builtin_sys_print(1+1>=1+1);
+        __builtin_sys_print(1+1>=2+1);
+        __builtin_sys_print(2+1>=1+1);
+        "#,
+        "110101",
+    );
+}
+
+#[test]
+fn parens() {
+    run_ok(
+        r#"
+        __builtin_sys_print(1+1*4);
+        __builtin_sys_print((1+1)*4);
+        __builtin_sys_print(1+(1*4));
+        "#,
+        "585",
+    );
+}
+
+#[test]
+fn parens2() {
+    run_ok(
+        r#"
+        __builtin_sys_print(((1+2)*3));
+        "#,
+        "9",
+    );
+}
+
+#[test]
+fn parens_not_closed() {
+    compile_error(
+        r#"
+        idk a = (1+2;
+        "#,
+        "`(` was not closed in an expression",
+    );
+}
