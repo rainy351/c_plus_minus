@@ -44,7 +44,9 @@ pub enum Token {
     LBrace,       // {
     RBrace,       // }
     Gt,           // >
+    GEq,          // >=
     Lt,           // <
+    LEq,          // <=
     // Output,       // ><
 
     // 4. На время разработки
@@ -95,8 +97,24 @@ pub fn tokenize(source_code: &str) -> Vec<Token> {
             ':' => { tokens.push(Token::Colon); chars.next(); }
             '.' => { tokens.push(Token::Dot); chars.next(); }
             ',' => { tokens.push(Token::Comma); chars.next(); }
-            '<' => { tokens.push(Token::Lt); chars.next(); }
-            '>' => { tokens.push(Token::Gt); chars.next(); }
+            '<' => {
+                chars.next();
+                if chars.peek() == Some(&'=') {
+                    tokens.push(Token::LEq);
+                    chars.next();
+                } else {
+                    tokens.push(Token::Lt);
+                }
+            }
+            '>' => {
+                chars.next();
+                if chars.peek() == Some(&'=') {
+                    tokens.push(Token::GEq);
+                    chars.next();
+                } else {
+                    tokens.push(Token::Gt);
+                }
+            }
             '(' => { tokens.push(Token::LParen); chars.next(); }
             ')' => { tokens.push(Token::RParen); chars.next(); }
             '{' => { tokens.push(Token::LBrace); chars.next(); }

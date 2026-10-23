@@ -460,7 +460,9 @@ impl Parser {
         while let Some(_token) = self.peek(){
             let op = match self.peek() {
                 Some(Token::Gt) => Ops::Gt,
+                Some(Token::GEq) => Ops::GEq,
                 Some(Token::Lt) => Ops::Lt,
+                Some(Token::LEq) => Ops::LEq,
                 _ => {
                     break;
                 }

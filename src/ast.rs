@@ -7,6 +7,8 @@ pub enum Ops {
     Mod,
     Gt,
     Lt,
+    GEq,
+    LEq,
     Equals,
     NotEquals,
 }
