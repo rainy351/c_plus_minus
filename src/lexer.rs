@@ -28,6 +28,8 @@ pub enum Token {
     // 3. Операторы и пунктуация
     Assign,       // =
     Equals,       // ==
+    NotEquals,    // !=
+    Invert,       // !
     Plus,         // +
     Minus,        // -
     Mult,         // *
@@ -78,6 +80,15 @@ pub fn tokenize(source_code: &str) -> Vec<Token> {
                     chars.next();
                 } else {
                     tokens.push(Token::Assign);
+                }
+            }
+            '!' => {
+                chars.next();
+                if chars.peek() == Some(&'=') {
+                    tokens.push(Token::NotEquals);
+                    chars.next();
+                } else {
+                    tokens.push(Token::Invert);
                 }
             }
             ';' => { tokens.push(Token::Semicolon); chars.next(); }

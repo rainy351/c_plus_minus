@@ -7,7 +7,8 @@ pub enum Ops {
     Mod,
     Gt,
     Lt,
-    Equals
+    Equals,
+    NotEquals,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

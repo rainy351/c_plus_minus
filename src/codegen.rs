@@ -11,6 +11,7 @@ fn op_to_c(op: &Ops) -> String {
         Ops::Gt => ">".to_string(),
         Ops::Mod => "%".to_string(),
         Ops::Equals => "==".to_string(),
+        Ops::NotEquals => "!=".to_string(),
     }
 }
 

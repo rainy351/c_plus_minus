@@ -470,6 +470,7 @@ impl Parser {
         while let Some(_token) = self.peek(){
             let op = match self.peek() {
                 Some(Token::Equals) => Ops::Equals,
+                Some(Token::NotEquals) => Ops::NotEquals,
                 _ => {
                     break;
                 }
