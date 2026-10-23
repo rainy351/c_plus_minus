@@ -48,6 +48,14 @@ impl Parser {
 
     pub fn parse_primary(&mut self) -> Expr {
         match self.advance() {
+            Some(Token::LParen) => {
+                let expr = self.parse_expr();
+                if self.peek() != Some(&Token::RParen) {
+                    panic!("parser: `(` was not closed in an expression.")
+                }
+                self.advance();
+                expr
+            }
             Some(Token::Number(num)) => {
                 Expr::Number(*num)
             },
